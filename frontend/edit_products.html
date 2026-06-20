@@ -4,466 +4,105 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Community Surplus | Add or Edit Product</title>
-  <style>
-    :root {
-      --bg: #f5f7fb;
-      --panel: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --line: #d9e1ec;
-      --brand: #178f6d;
-      --brand-dark: #0f6f55;
-      --accent: #f2a541;
-      --shadow: 0 12px 30px rgba(31, 41, 55, 0.08);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    header {
-      background: var(--panel);
-      border-bottom: 1px solid var(--line);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .nav {
-      max-width: 1100px;
-      margin: 0 auto;
-      min-height: 70px;
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 21px;
-      font-weight: 800;
-      color: var(--brand-dark);
-      text-decoration: none;
-    }
-
-    .brand-mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      background: var(--brand);
-      font-weight: 900;
-    }
-
-    .links {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .links a {
-      padding: 9px 12px;
-      border-radius: 7px;
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .links a.active,
-    .links a:hover {
-      background: #e7f6f1;
-      color: var(--brand-dark);
-    }
-
-    main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 28px 20px 48px;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .panel,
-    .preview {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-
-    h1,
-    h2 {
-      margin: 0 0 10px;
-    }
-
-    p {
-      margin: 0 0 18px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    form {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-
-    label {
-      display: grid;
-      gap: 7px;
-      color: var(--muted);
-      font-weight: 800;
-      font-size: 13px;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      padding: 11px 12px;
-      font: inherit;
-      background: #fff;
-      color: var(--text);
-    }
-
-    textarea {
-      min-height: 112px;
-      resize: vertical;
-    }
-
-    .wide { grid-column: 1 / -1; }
-
-    .btn {
-      border: 0;
-      border-radius: 7px;
-      padding: 11px 14px;
-      background: var(--brand);
-      color: #fff;
-      font-weight: 800;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 42px;
-    }
-
-    .btn.secondary {
-      background: #eef2f7;
-      color: var(--text);
-    }
-
-    .preview img {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
-      border-radius: 8px;
-      background: #e5e7eb;
-      margin-bottom: 14px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      min-height: 28px;
-      width: fit-content;
-      border-radius: 999px;
-      padding: 5px 10px;
-      background: #e7f6f1;
-      color: var(--brand-dark);
-      font-size: 12px;
-      font-weight: 800;
-      margin-bottom: 10px;
-    }
-
-    .price {
-      font-weight: 900;
-      color: var(--brand-dark);
-      font-size: 24px;
-      margin: 8px 0;
-    }
-
-    .meta {
-      color: var(--muted);
-      line-height: 1.5;
-      font-size: 14px;
-    }
-
-    .message {
-      display: none;
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 7px;
-      background: #e7f6f1;
-      color: var(--brand-dark);
-      font-weight: 800;
-    }
-
-    @media (max-width: 900px) {
-      .layout,
-      form {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 620px) {
-      .nav {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .links,
-      .btn {
-        width: 100%;
-      }
-
-      .links a {
-        flex: 1;
-        text-align: center;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/navbar.css">
+  <link rel="stylesheet" href="css/forms.css">
 </head>
 <body>
-  <header>
-    <nav class="nav">
-      <a class="brand" href="dashboard.html"><span class="brand-mark">CS</span> Community Surplus</a>
-      <div class="links">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="my_products.html">My Products</a>
-        <a href="profile.html">Profile</a>
-        <a class="active" href="edit_products.html">Add Product</a>
+  <header class="site-header">
+    <nav class="nav container">
+      <a class="brand" href="index.html"><span class="brand-mark">CS</span> Community Surplus</a>
+      <button class="nav-toggle" type="button" data-nav-toggle>Menu</button>
+      <div class="nav-links" data-nav-links>
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="sell.html">Sell</a>
+        <a href="wishlist.html">Wishlist</a>
+        <a href="dashboard.html" data-auth-only>Dashboard</a>
+        <a href="profile.html" data-auth-only>Profile</a>
+        <a href="my_products.html" data-auth-only>My Products</a>
+        <a href="login.html" data-guest-only>Login</a>
+        <a href="register.html" data-guest-only>Register</a>
+        <button type="button" data-logout data-auth-only>Logout</button>
+        <span class="user-chip" data-user-chip>Guest</span>
       </div>
     </nav>
   </header>
 
-  <main>
-    <section class="layout">
-      <section class="panel">
-        <h1 id="pageTitle">Add Product</h1>
-        <p>Post an item for sale, donation, or reuse. All saved items will appear on the dashboard and my products page.</p>
-        <form id="productForm">
-          <label>Product Name
-            <input id="name" required placeholder="Example: Study Table">
-          </label>
-          <label>Category
-            <select id="category">
-              <option>Electronics</option>
-              <option>Books</option>
-              <option>Furniture</option>
-              <option>Clothing</option>
-              <option>Kitchen</option>
-              <option>Other</option>
-            </select>
-          </label>
-          <label>Condition
-            <select id="condition">
-              <option>New</option>
-              <option>Good</option>
-              <option>Used</option>
-            </select>
-          </label>
-          <label>Availability
-            <select id="availability">
-              <option>Available</option>
-              <option>Reserved</option>
-              <option>Sold Out</option>
-            </select>
-          </label>
-          <label>Original MRP
-            <input id="mrp" type="number" min="0" required>
-          </label>
-          <label>Selling Price
-            <input id="price" type="number" min="0" required>
-          </label>
-          <label>Location
-            <input id="location" required>
-          </label>
-          <label>Contact Number
-            <input id="contact" required>
-          </label>
-          <label>Seller Name
-            <input id="seller" required>
-          </label>
-          <label>Listing Type
-            <select id="type">
-              <option>Sale</option>
-              <option>Donation</option>
-              <option>Exchange</option>
-            </select>
-          </label>
-          <label class="wide">Image URL
-            <input id="image" placeholder="Paste an image link">
-          </label>
-          <label class="wide">Description
-            <textarea id="description" required></textarea>
-          </label>
-          <div class="wide">
-            <button class="btn" type="submit">Save Product</button>
-            <a class="btn secondary" href="my_products.html">View My Products</a>
-            <div class="message" id="message">Product saved successfully.</div>
-          </div>
-        </form>
-      </section>
+  <main class="page-shell container">
+    <div class="page-header">
+      <div>
+        <p class="eyebrow">Seller</p>
+        <h1>Edit Product</h1>
+        <p>Update the listing details buyers see in the marketplace.</p>
+      </div>
+      <a class="button secondary" href="my_products.html">Back to My Products</a>
+    </div>
 
-      <aside class="preview">
-        <h2>Preview</h2>
-        <img id="previewImage" src="https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=900&q=80" alt="Product preview">
-        <span class="badge" id="previewStatus">Available</span>
-        <h2 id="previewName">Product Name</h2>
-        <div class="meta" id="previewMeta">Category • Condition • Location</div>
-        <div class="price" id="previewPrice">Rs. 0</div>
-        <p id="previewDescription">Product description will appear here.</p>
-        <div class="meta" id="previewContact">Seller contact</div>
-      </aside>
-    </section>
+    <form class="form-panel" data-edit-product-form>
+      <div class="form-grid">
+        <label class="field">
+          <span>Product Name</span>
+          <input name="productName" type="text" required>
+        </label>
+        <label class="field">
+          <span>Category</span>
+          <select name="category" required>
+            <option value="Furniture">Furniture</option>
+            <option value="Books">Books</option>
+            <option value="Appliances">Appliances</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Vehicles">Vehicles</option>
+            <option value="Home">Home</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Condition</span>
+          <select name="condition" required>
+            <option value="Like New">Like New</option>
+            <option value="Good">Good</option>
+            <option value="Used">Used</option>
+            <option value="Needs Repair">Needs Repair</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Status</span>
+          <select name="status" required>
+            <option value="Available">Available</option>
+            <option value="Sold">Sold</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Original MRP</span>
+          <input name="mrp" type="number" min="0" required>
+        </label>
+        <label class="field">
+          <span>Selling Price</span>
+          <input name="sellingPrice" type="number" min="0" required>
+        </label>
+        <label class="field">
+          <span>Replace Image</span>
+          <input name="image" type="file" accept="image/*">
+        </label>
+        <label class="field">
+          <span>Location</span>
+          <input name="location" type="text" required>
+        </label>
+        <label class="field">
+          <span>Contact Number</span>
+          <input name="contactNumber" type="tel" required>
+        </label>
+        <label class="field full">
+          <span>Description</span>
+          <textarea name="description" required></textarea>
+        </label>
+      </div>
+      <button class="button" type="submit">Save Product</button>
+      <p class="form-message" data-form-message></p>
+    </form>
   </main>
 
-  <script>
-    const defaultProducts = [
-      {
-        id: "p1",
-        name: "Study Table",
-        category: "Furniture",
-        condition: "Good",
-        availability: "Available",
-        mrp: 3500,
-        price: 1800,
-        location: "Kochi",
-        contact: "9876543210",
-        seller: "Sreenidhi",
-        description: "Strong wooden table suitable for students.",
-        image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=900&q=80",
-        type: "Sale"
-      }
-    ];
-
-    const fields = ["name", "category", "condition", "availability", "mrp", "price", "location", "contact", "seller", "type", "image", "description"];
-    const fallbackImage = "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=900&q=80";
-    const params = new URLSearchParams(window.location.search);
-    const editId = params.get("id");
-
-    function getProducts() {
-      const saved = localStorage.getItem("communityProducts");
-      if (saved) return JSON.parse(saved);
-      localStorage.setItem("communityProducts", JSON.stringify(defaultProducts));
-      return defaultProducts;
-    }
-
-    function saveProducts(products) {
-      localStorage.setItem("communityProducts", JSON.stringify(products));
-    }
-
-    function money(value) {
-      return Number(value) === 0 ? "Free" : "Rs. " + Number(value || 0).toLocaleString("en-IN");
-    }
-
-    function fieldValue(id) {
-      return document.getElementById(id).value.trim();
-    }
-
-    function fillForm(product) {
-      fields.forEach(field => {
-        document.getElementById(field).value = product[field] || "";
-      });
-    }
-
-    function readForm() {
-      return {
-        id: editId || "p" + Date.now(),
-        name: fieldValue("name"),
-        category: fieldValue("category"),
-        condition: fieldValue("condition"),
-        availability: fieldValue("availability"),
-        mrp: Number(fieldValue("mrp")),
-        price: Number(fieldValue("price")),
-        location: fieldValue("location"),
-        contact: fieldValue("contact"),
-        seller: fieldValue("seller"),
-        type: fieldValue("type"),
-        image: fieldValue("image") || fallbackImage,
-        description: fieldValue("description")
-      };
-    }
-
-    function updatePreview() {
-      const product = readForm();
-      document.getElementById("previewImage").src = product.image || fallbackImage;
-      document.getElementById("previewStatus").textContent = product.availability || "Available";
-      document.getElementById("previewName").textContent = product.name || "Product Name";
-      document.getElementById("previewMeta").textContent = `${product.category || "Category"} • ${product.condition || "Condition"} • ${product.location || "Location"}`;
-      document.getElementById("previewPrice").textContent = money(product.price);
-      document.getElementById("previewDescription").textContent = product.description || "Product description will appear here.";
-      document.getElementById("previewContact").textContent = `Seller: ${product.seller || "Seller"} | Contact: ${product.contact || "Contact number"} | ${product.type || "Sale"}`;
-    }
-
-    function loadEditProduct() {
-      const products = getProducts();
-      const product = products.find(item => item.id === editId);
-      if (product) {
-        document.getElementById("pageTitle").textContent = "Edit Product";
-        fillForm(product);
-      } else {
-        fillForm({
-          name: "",
-          category: "Electronics",
-          condition: "Good",
-          availability: "Available",
-          mrp: "",
-          price: "",
-          location: "",
-          contact: "",
-          seller: "Sreenidhi",
-          type: "Sale",
-          image: fallbackImage,
-          description: ""
-        });
-      }
-      updatePreview();
-    }
-
-    document.getElementById("productForm").addEventListener("submit", event => {
-      event.preventDefault();
-      const product = readForm();
-      const products = getProducts();
-      const exists = products.some(item => item.id === product.id);
-      const updated = exists ? products.map(item => item.id === product.id ? product : item) : [product, ...products];
-      saveProducts(updated);
-
-      const message = document.getElementById("message");
-      message.style.display = "block";
-      setTimeout(() => {
-        window.location.href = "my_products.html";
-      }, 900);
-    });
-
-    fields.forEach(field => {
-      document.getElementById(field).addEventListener("input", updatePreview);
-      document.getElementById(field).addEventListener("change", updatePreview);
-    });
-
-    loadEditProduct();
-  </script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>

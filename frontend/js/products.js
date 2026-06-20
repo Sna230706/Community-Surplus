@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   "use strict";
 
   const grid = document.querySelector("[data-product-grid]");
@@ -84,12 +84,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     return copy.sort(function (a, b) {
-      return new Date(b.createdAt) - new Date(a.createdAt);
+      return Number(b.id) - Number(a.id) || new Date(b.createdAt) - new Date(a.createdAt);
     });
   }
 
   function render() {
-    const allProducts = window.CS.getProducts();
     const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
     const category = categorySelect ? categorySelect.value : "";
     const condition = conditionSelect ? conditionSelect.value : "";
@@ -112,7 +111,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  const allProducts = window.CS.getProducts();
+  grid.innerHTML = `<div class="empty-state"><p class="muted">Loading...</p></div>`;
+  let allProducts = await window.CS.fetchProducts();
   readQuery();
   fillSelect(categorySelect, "All categories", uniqueValues(allProducts, "category"));
   fillSelect(conditionSelect, "Any condition", uniqueValues(allProducts, "condition"));
@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       activeChip = button.dataset.categoryChip;
-      buildChips(window.CS.getProducts());
+      buildChips(allProducts);
       render();
     });
   }
