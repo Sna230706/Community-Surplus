@@ -1,59 +1,85 @@
+/* ==========================================================================
+   PRODUCT STOREFRONT GRID
+   ========================================================================== */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 20px; 
 }
 
+/* ==========================================================================
+   PRODUCT CARD ARCHITECTURE
+   ========================================================================== */
 .product-card {
   display: grid;
+  grid-template-rows: auto 1fr auto;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-shop); 
   background: var(--surface);
-  box-shadow: 0 8px 24px rgba(29, 38, 48, 0.07);
+  box-shadow: var(--shadow-soft);
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+
+.product-card:hover {
+  border-color: rgba(196, 164, 140, 0.4);
+  box-shadow: var(--shadow);
+  transform: translateY(-4px);
 }
 
 .product-card.is-sold {
-  opacity: 0.72;
+  opacity: 0.65; 
 }
 
 .product-media {
   position: relative;
-  background: #eef4ef;
+  background: var(--surface-soft);
 }
 
 .product-media img {
+  display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
 }
 
+/* Floating Badge */
 .product-badge {
   position: absolute;
   left: 12px;
   top: 12px;
-  border-radius: 999px;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--green-dark);
-  font-size: 0.78rem;
-  font-weight: 900;
+  border: 1px solid #c2a691;
+  border-radius: var(--radius-shop); 
+  padding: 6px 12px;
+  background: var(--surface-tint);
+  color: #7c5c43; 
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 12px rgba(43, 34, 30, 0.06);
 }
 
+/* Card Information Body */
 .product-body {
   display: grid;
-  gap: 10px;
-  padding: 16px;
+  gap: 8px;
+  padding: 18px;
 }
 
 .product-body h3 {
   margin: 0;
   font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .product-body p {
   margin: 0;
   color: var(--muted);
+  font-size: 0.95rem;
 }
 
 .product-facts {
@@ -62,45 +88,81 @@
   gap: 8px;
 }
 
+/* Target any tags/pills explicitly inside the product facts container */
+.product-facts * {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: var(--radius-shop);
+  padding: 0 12px;
+  background: var(--surface-tint);  /* Soft cream color from your image */
+  color: #7c5c43;                   /* Darker coffee brown for clarity */
+  border: 1px solid #c2a691;        /* Darker brown border matching text */
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   CARD ACTION FOOTER PANELS
+   ========================================================================== */
 .product-actions {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  padding: 0 16px 16px;
+  border-top: 1px solid var(--line);
+  padding: 14px 18px 18px;
+  background: var(--surface-tint); 
 }
 
+/* Secondary Actions */
 .wishlist-button {
   border: 1px solid var(--line);
-  border-radius: 8px;
-  min-height: 42px;
-  padding: 0 12px;
+  border-radius: var(--radius-shop);
+  min-height: 44px;
+  padding: 0 14px;
   background: var(--surface);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 150ms ease;
+}
+
+.wishlist-button:hover {
+  border-color: var(--primary-brand);
   color: var(--ink);
-  font-weight: 900;
+  background: var(--surface-soft);
+  transform: translateY(-1px);
 }
 
 .wishlist-button.is-saved {
-  border-color: #f2c86b;
-  background: #fff4d6;
-  color: #6f4700;
+  border-color: var(--line);
+  background: var(--surface-soft);
+  color: var(--green-dark);
 }
 
 .owner-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 0 16px 16px;
+  padding: 0 18px 18px;
 }
 
+/* ==========================================================================
+   RESPONSIVE LAYOUT BREAKPOINTS
+   ========================================================================== */
 @media (max-width: 920px) {
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
   }
 }
 
 @media (max-width: 620px) {
   .product-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 }

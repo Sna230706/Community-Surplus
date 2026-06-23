@@ -1,10 +1,14 @@
+/* ==========================================================================
+   STICKY SITE NAVIGATION
+   ========================================================================== */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 253, 250, 0.96);
+  background: rgba(250, 248, 245, 0.92); /* Blends perfectly into the linen --bg canvas */
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px); /* Ensures safari compatibility */
 }
 
 .nav {
@@ -15,24 +19,32 @@
   gap: 20px;
 }
 
+/* Brand logo and styling labels */
 .brand {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-weight: 900;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
 }
 
+/* Iconic branding square placeholder */
 .brand-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  background: var(--green);
+  border-radius: calc(var(--radius-shop) - 4px); /* Scales cleanly down to an 8px block */
+  background: var(--green-dark); /* Rich coffee brown tone */
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(43, 34, 30, 0.15); /* Coffee-colored ambient brand glow */
 }
 
+/* ==========================================================================
+   NAVIGATION LINKS & TABS
+   ========================================================================== */
 .nav-links {
   display: flex;
   align-items: center;
@@ -41,42 +53,55 @@
 
 .nav-links a,
 .nav-links button {
-  border: 0;
-  border-radius: 8px;
-  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-shop);
+  padding: 10px 14px;
   background: transparent;
   color: var(--muted);
-  font-weight: 800;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 150ms ease;
 }
 
+/* Interactive link feedback states */
 .nav-links a:hover,
 .nav-links a.is-active,
 .nav-links button:hover {
-  background: var(--surface-soft);
-  color: var(--ink);
+  border-color: #c2a691;     /* Darker brown border matching text */
+  background: var(--surface-tint);  /* Soft cream pastel backdrop */
+  color: #7c5c43;            /* Darker coffee brown for emphasis */
 }
 
+/* ==========================================================================
+   USER BADGE / PROFILE CONTAINER
+   ========================================================================== */
 .user-chip {
   display: inline-flex;
   align-items: center;
   min-height: 36px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0 12px;
-  color: var(--green-dark);
-  font-weight: 800;
+  border: 1px solid #c2a691;        /* Darker coffee border */
+  border-radius: 999px;            /* Retains clean capsule geometry for profile indicators */
+  padding: 0 16px;
+  background: var(--surface-tint);  /* Soft cream color */
+  color: #7c5c43;                   /* Darker coffee brown text */
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
+/* Responsive Mobile Toggle Button */
 .nav-toggle {
   display: none;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-shop);
   background: var(--surface);
-  padding: 9px 12px;
+  padding: 9px 14px;
   color: var(--ink);
-  font-weight: 900;
+  font-weight: 600;
 }
 
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE REFACTOR
+   ========================================================================== */
 @media (max-width: 900px) {
   .nav {
     flex-wrap: wrap;
@@ -93,6 +118,7 @@
     align-items: stretch;
     flex-direction: column;
     padding-bottom: 10px;
+    gap: 4px;
   }
 
   .nav-links.is-open {
@@ -101,5 +127,6 @@
 
   .user-chip {
     justify-content: center;
+    margin-top: 8px;
   }
 }
