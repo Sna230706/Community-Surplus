@@ -4,7 +4,7 @@ const app=express();
 app.use(express.json());
 
 
-const productRoutes=require("./routes/products");
+const productRoutes=require("./routes/productRoutes");
 app.get("/", (req, res) => {
     res.send("Community Surplus API is running");
 });

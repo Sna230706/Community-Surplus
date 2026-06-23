@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", function () {
     event.preventDefault();
     const name = form.elements.name.value.trim();
     const email = form.elements.email.value.trim().toLowerCase();
+    const phone = form.elements.phone.value.trim();
+    const location = form.elements.location.value.trim();
     const password = form.elements.password.value;
     const confirmPassword = form.elements.confirmPassword.value;
 
@@ -28,6 +30,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const payload = {
       name,
       email,
+      phone,
+      location,
       password
     };
 

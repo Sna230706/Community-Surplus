@@ -414,7 +414,68 @@
     setCurrentUser(user);
     if (token) {
       storageSet(TOKEN_KEY, token);
+    } else {
+      storageRemove(TOKEN_KEY);
     }
+  }
+
+  function normalizeEmail(email) {
+    return String(email || "").trim().toLowerCase();
+  }
+
+  function publicUser(user) {
+    if (!user) {
+      return null;
+    }
+
+    const safeUser = { ...user };
+    delete safeUser.password;
+    return safeUser;
+  }
+
+  function shouldUseLocalAuth(error) {
+    return Boolean(error && (error.isNetworkError || error.status === 404));
+  }
+
+  function loginUserLocal(credentials) {
+    const email = normalizeEmail(credentials.email);
+    const user = getUsers().find(function (candidate) {
+      return normalizeEmail(candidate.email) === email && candidate.password === credentials.password;
+    });
+
+    if (!user) {
+      throw new Error("Email or password is incorrect.");
+    }
+
+    setAuth(publicUser(user));
+    return publicUser(user);
+  }
+
+  function registerUserLocal(payload) {
+    const email = normalizeEmail(payload.email);
+    const users = getUsers();
+    const existingUser = users.find(function (candidate) {
+      return normalizeEmail(candidate.email) === email;
+    });
+
+    if (existingUser) {
+      throw new Error("An account with this email already exists.");
+    }
+
+    const user = {
+      id: newId("user"),
+      name: String(payload.name || "").trim(),
+      email,
+      password: payload.password,
+      phone: String(payload.phone || "").trim(),
+      location: String(payload.location || "").trim(),
+      bio: ""
+    };
+
+    users.push(user);
+    saveUsers(users);
+    setAuth(publicUser(user));
+    return publicUser(user);
   }
 
   function logout() {
@@ -491,17 +552,27 @@
       body = JSON.stringify(body);
     }
 
-    const response = await fetch(API_BASE_URL + path, {
-      ...settings,
-      headers,
-      body
-    });
+    let response;
+    try {
+      response = await fetch(API_BASE_URL + path, {
+        ...settings,
+        headers,
+        body
+      });
+    } catch (error) {
+      const fetchError = new Error("Could not connect to the backend server.");
+      fetchError.isNetworkError = true;
+      throw fetchError;
+    }
+
     const data = await response.json().catch(function () {
       return {};
     });
 
     if (!response.ok) {
-      throw new Error(data.message || "Request failed.");
+      const requestError = new Error(data.message || "Request failed.");
+      requestError.status = response.status;
+      throw requestError;
     }
 
     return data;
@@ -570,21 +641,37 @@
   }
 
   async function loginUser(credentials) {
-    const data = await apiFetch("/login", {
-      method: "POST",
-      body: credentials
-    });
-    setAuth(data.user, data.token);
-    return data.user;
+    try {
+      const data = await apiFetch("/login", {
+        method: "POST",
+        body: credentials
+      });
+      setAuth(publicUser(data.user), data.token);
+      return publicUser(data.user);
+    } catch (error) {
+      if (shouldUseLocalAuth(error)) {
+        return loginUserLocal(credentials);
+      }
+
+      throw error;
+    }
   }
 
   async function registerUser(payload) {
-    const data = await apiFetch("/register", {
-      method: "POST",
-      body: payload
-    });
-    setAuth(data.user, data.token);
-    return data.user;
+    try {
+      const data = await apiFetch("/register", {
+        method: "POST",
+        body: payload
+      });
+      setAuth(publicUser(data.user), data.token);
+      return publicUser(data.user);
+    } catch (error) {
+      if (shouldUseLocalAuth(error)) {
+        return registerUserLocal(payload);
+      }
+
+      throw error;
+    }
   }
 
   async function fetchDashboard() {
