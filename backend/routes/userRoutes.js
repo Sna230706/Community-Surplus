@@ -67,13 +67,16 @@ router.post("/login", (req, res) => {
         message: "Invalid email or password"
       });
     }
-
-    res.json({
-      message: "Login successful",
-      userId: user.user_id,
-      name: user.name,
-      email: user.email
-    });
+res.json({
+  message: "Login successful",
+  user: {
+    id: user.user_id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    location: user.location
+  }
+});
   });
 });
 
