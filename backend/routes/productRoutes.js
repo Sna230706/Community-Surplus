@@ -2,14 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const db=require("../config/db");
-let products = [
-    {
-        id: 1,
-        name: "Laptop",
-        price: 15000,
-        seller: "John"
-    }
-];
+
 
 router.get("/", (req,res) => {
    db.query("SELECT * FROM products",
@@ -24,159 +17,126 @@ router.get("/", (req,res) => {
 
 router.post("/", (req,res) => {
 
-    const { id, name, price, seller } = req.body;
-  
+    const { 
+        seller_id,category_id,product_name,description,product_condition,mrp,selling_price,
+        quantity_available,location,contact_number
+     } = req.body;
+if (
+    !seller_id ||
+    !category_id ||
+    !product_name ||
+    !selling_price ||
+    !mrp
+) {
+    return res.status(400).json({
+        message: "Required fields missing"
+    });
+}
+     const sql= `
+     INSERT INTO products(
+             seller_id,category_id,product_name,description,product_condition,mrp,selling_price,
+        quantity_available,location,contact_number)VALUES(?,?,?,?,?,?,?,?,?,?)`;
 
-   if(
-    id === undefined ||
-    name === undefined ||
-    price === undefined ||
-    seller === undefined
-){
-    return res.status(400).json({
-        message: "All fields are required"
-    });
-}
-  if (typeof price !== "number") {
-    return res.status(400).json({
-        message: "Price must be a number"
-    });
-}
-if (typeof id !== "number") {
-    return res.status(400).json({
-        message: "ID must be a number"
-    });
-}
-if (price < 0) {
-    return res.status(400).json({
-        message: "Price cannot be negative"
-    });
-}
-    const product = {
-        id,
-        name,
-        price,
-        seller
-    };
-const existingProduct = products.find(
-    p => p && p.id === id
-);
+        db.query(
+            sql,
+            [
+            seller_id,category_id,product_name,description,product_condition,mrp,selling_price,
+        quantity_available,location,contact_number
+            ],
+            (err,result) => {
+                if (err) {
+                    return res.status(500).json(err);
+                }
+                res.status(201).json({ message: "Product added successfully", productId: result.insertId });
+            }
+        );
 
-if(existingProduct){
-    return res.status(400).json({
-        message: "Product ID already exists"
-    });
-}
-    products.push(product);
-
-    res.status(201).json({
-        message: "Product added successfully",
-        product
-    });
+   
 
 });
 
 router.get("/:id", (req,res) => {
 
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
 if (isNaN(id)) {
     return res.status(400).json({
         message: "Invalid product ID"
     });
 }
-    const product = products.find(
-        p => p && p.id === id
-    );
-
-    if(!product){
-        return res.status(404).json({
-            message: "Product not found"
-        });
+db.query("SELECT * FROM products WHERE product_id = ?", [id],(err,results) => {
+    if (err) return res.status(500).json(err);
+    if (results.length === 0){
+        return res.status(404).json({ message: "Product not found"});
     }
-
-    res.json(product);
+    res.json(results[0]);
+});
 });
 
 router.delete("/:id", (req,res) => {
 
-    const id = parseInt(req.params.id);
-if (isNaN(id)) {
+    const id = req.params.id;
+    if (isNaN(id)) {
     return res.status(400).json({
         message: "Invalid product ID"
     });
 }
-    const product = products.find(
-        p => p && p.id === id
-    );
-
-    if(!product){
-        return res.status(404).json({
-            message: "Product not found"
-        });
+db.query("DELETE FROM products WHERE product_id = ?", [id], (err,result) => {
+    if (err) return res.status(500).json(err);
+    if (result.affectedRows === 0){
+        return res.status(404).json({ message: "Product not found"});
     }
-
-    products = products.filter(
-        p => p && p.id !== id
-    );
-
     res.json({
-        message: "Product deleted successfully"
-    });
+        message: "Product deleted successfully"});
+});
 
 });
 
 router.put("/:id", (req,res) => {
-     const id = parseInt(req.params.id);
+     const id = req.params.id;
 if (isNaN(id)) {
     return res.status(400).json({
         message: "Invalid product ID"
     });
 }
-    const product = products.find(p => p && p.id === id);
-    if (!product){
-        return res.status(404).json({ message: "Product not found"});
-    }
-
-    if(
-    req.body.name === undefined &&
-    req.body.price === undefined &&
-    req.body.seller === undefined
-){
+   const {
+        product_name,
+        description,
+        product_condition,
+        mrp,
+        selling_price,
+        quantity_available,
+        location,
+        contact_number
+    } = req.body;
+if (!product_name || !selling_price) {
     return res.status(400).json({
-        message: "No fields provided for update"
+        message: "product_name and selling_price are required"
     });
 }
-if (
-    req.body.price !== undefined &&
-    typeof req.body.price !== "number"
-) {
-    return res.status(400).json({
-        message: "Price must be a number"
-    });
-}
-if (
-    req.body.price !== undefined &&
-    req.body.price < 0
-) {
-    return res.status(400).json({
-        message: "Price cannot be negative"
-    });
-}
-   if(req.body.name !== undefined){
-    product.name = req.body.name;
-}
+    const sql = `
+        UPDATE products
+        SET product_name=?, description=?, product_condition=?, mrp=?, selling_price=?, quantity_available=?, location=?, contact_number=?
+        WHERE product_id=?
+    `;
+db.query(
+        sql,
+        [
+            product_name,
+            description,
+            product_condition,
+            mrp,
+            selling_price,
+            quantity_available,
+            location,
+            contact_number,
+            id
+        ],
+        (err, result) => {
+            if (err) return res.status(500).json(err);
 
-if(req.body.price !== undefined){
-    product.price = req.body.price;
-}
-
-if(req.body.seller !== undefined){
-    product.seller = req.body.seller;
-}
-    res.json({
-        message: "Product updated ",
-        product
-    });
+            res.json({ message: "Product updated successfully" });
+        }
+    );
 });
 
 module.exports = router;
