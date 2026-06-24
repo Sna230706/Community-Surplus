@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+const db=require("../config/db");
 let products = [
     {
         id: 1,
@@ -11,7 +12,14 @@ let products = [
 ];
 
 router.get("/", (req,res) => {
-    res.json(products);
+   db.query("SELECT * FROM products",
+    (err,results) => {
+        if (err){
+            return res.status(500).json(err);
+        }
+        res.json(results);
+    }
+   );
 });
 
 router.post("/", (req,res) => {
