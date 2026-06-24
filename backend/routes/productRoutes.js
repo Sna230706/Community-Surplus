@@ -25,8 +25,10 @@ if (
     !seller_id ||
     !category_id ||
     !product_name ||
+    !product_condition ||
     !selling_price ||
-    !mrp
+    !location ||
+    !contact_number
 ) {
     return res.status(400).json({
         message: "Required fields missing"
@@ -108,7 +110,8 @@ if (isNaN(id)) {
         location,
         contact_number
     } = req.body;
-if (!product_name || !selling_price) {
+if (    product_name === undefined ||
+    selling_price === undefined) {
     return res.status(400).json({
         message: "product_name and selling_price are required"
     });
@@ -133,7 +136,11 @@ db.query(
         ],
         (err, result) => {
             if (err) return res.status(500).json(err);
-
+ if (result.affectedRows === 0) {
+        return res.status(404).json({
+            message: "Product not found"
+        });
+    }
             res.json({ message: "Product updated successfully" });
         }
     );
