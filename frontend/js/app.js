@@ -7,7 +7,7 @@
   const CURRENT_USER_KEY = "community_surplus_current_user_v1";
   const TOKEN_KEY = "community_surplus_token_v1";
   const PURCHASE_KEY = "community_surplus_purchases_v1";
-  const API_BASE_URL = "http://localhost:5000";
+  const API_BASE_URL = "http://localhost:5000/api";
   const FALLBACK_IMAGE = "images/placeholder.svg";
 
   const sampleProducts = [
@@ -19,6 +19,7 @@
       condition: "Good",
       mrp: 4500,
       sellingPrice: 1800,
+      quantityAvailable: 1,
       image: "images/table.svg",
       location: "Ameerpet",
       contactNumber: "9876543210",
@@ -35,6 +36,7 @@
       condition: "Used",
       mrp: 8500,
       sellingPrice: 3200,
+      quantityAvailable: 1,
       image: "images/cycle.svg",
       location: "Begumpet",
       contactNumber: "9876501234",
@@ -44,13 +46,15 @@
       createdAt: "2026-06-10"
     },
     {
+      // BUG FIX: Updated to match your current project scope category change
       id: "p-books",
-      productName: "Engineering Books Set",
-      description: "Reference books for first-year engineering subjects in clean condition.",
-      category: "Books",
+      productName: "Engineering Stationary Set",
+      description: "Reference stationary tools and items for first-year engineering subjects in clean condition.",
+      category: "Stationary",
       condition: "Like New",
       mrp: 3600,
       sellingPrice: 900,
+      quantityAvailable: 4,
       image: "images/books.svg",
       location: "Kukatpally",
       contactNumber: "9876512345",
@@ -67,6 +71,7 @@
       condition: "Good",
       mrp: 2800,
       sellingPrice: 1200,
+      quantityAvailable: 1,
       image: "images/mixer.svg",
       location: "Madhapur",
       contactNumber: "9876523456",
@@ -83,6 +88,7 @@
       condition: "Good",
       mrp: 6500,
       sellingPrice: 2400,
+      quantityAvailable: 2,
       image: "images/chair.svg",
       location: "Gachibowli",
       contactNumber: "9876534567",
@@ -99,6 +105,7 @@
       condition: "Like New",
       mrp: 1600,
       sellingPrice: 650,
+      quantityAvailable: 1,
       image: "images/lamp.svg",
       location: "Secunderabad",
       contactNumber: "9876545678",
@@ -150,7 +157,6 @@
     if (!raw) {
       return fallback;
     }
-
     try {
       return JSON.parse(raw);
     } catch (error) {
@@ -166,7 +172,6 @@
     if (!storageGet(PRODUCT_KEY)) {
       writeJSON(PRODUCT_KEY, sampleProducts);
     }
-
     if (!storageGet(USERS_KEY)) {
       writeJSON(USERS_KEY, sampleUsers);
     }
@@ -194,26 +199,28 @@
   }
 
   function normalizeProduct(product) {
-    let image = product.image || FALLBACK_IMAGE;
-    if (image.startsWith("/uploads/")) {
+    let image = product.image || product.image_url || FALLBACK_IMAGE;
+    if (image && image.startsWith("/uploads/")) {
       image = API_BASE_URL + image;
     }
 
     return {
-      id: product.id || newId("p"),
-      productName: product.productName || product.product_name || "Untitled Product",
+      id: product.product_id !== undefined ? String(product.product_id) : (product.id || newId("p")),
+      productName: product.product_name || product.productName || "Untitled Product",
       description: product.description || "",
-      category: product.category || "Other",
-      condition: product.condition || "Used",
+      category: product.category_name || product.category || "Other",
+      category_id: product.category_id || null, 
+      condition: product.product_condition || product.condition || "Used",
       mrp: Number(product.mrp || 0),
-      sellingPrice: Number(product.sellingPrice || product.selling_price || 0),
+      sellingPrice: Number(product.selling_price || product.sellingPrice || 0),
+      quantityAvailable: Number(product.quantity_available ?? product.quantityAvailable ?? 1),
       image,
       location: product.location || "Not specified",
-      contactNumber: product.contactNumber || product.contact_number || "",
+      contactNumber: product.contact_number || product.contactNumber || "",
       status: product.status || "Available",
-      sellerId: product.sellerId || product.seller_id || "guest",
-      sellerName: product.sellerName || product.seller_name || "Community Seller",
-      createdAt: product.createdAt || new Date().toISOString().slice(0, 10)
+      sellerId: product.seller_id !== undefined ? String(product.seller_id) : (product.sellerId || "guest"),
+      sellerName: product.seller_name || product.sellerName || "Community Seller",
+      createdAt: product.created_at || product.createdAt || new Date().toISOString().slice(0, 10)
     };
   }
 
@@ -227,7 +234,7 @@
 
   function getProductById(id) {
     return getProducts().find(function (product) {
-      return product.id === id;
+      return String(product.id) === String(id);
     });
   }
 
@@ -243,7 +250,6 @@
     if (!value) {
       return "Recently";
     }
-
     return new Intl.DateTimeFormat("en-IN", {
       day: "numeric",
       month: "short",
@@ -256,7 +262,6 @@
     if (clean.length <= size) {
       return clean;
     }
-
     return clean.slice(0, size - 3).trim() + "...";
   }
 
@@ -332,7 +337,7 @@
     const sold = item.status.toLowerCase() === "sold";
     const ownerActions = settings.ownerActions ? `
       <div class="owner-actions">
-        <a class="button secondary" href="edit-product.html?id=${encodeURIComponent(item.id)}">Edit</a>
+       <a class="button secondary" href="edit_products.html?id=${encodeURIComponent(item.id)}">Edit</a>
         <button class="button secondary" type="button" data-toggle-status="${escapeAttr(item.id)}">${sold ? "Mark Available" : "Mark Sold"}</button>
         <button class="button danger" type="button" data-delete-product="${escapeAttr(item.id)}">Delete</button>
       </div>
@@ -340,24 +345,25 @@
 
     return `
       <article class="product-card${sold ? " is-sold" : ""}" data-product-card="${escapeAttr(item.id)}">
-        <a class="product-media" href="product.html?id=${encodeURIComponent(item.id)}">
+        <a class="product-media" href="product_details.html?id=${encodeURIComponent(item.id)}">
           <img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.productName)}">
           <span class="product-badge">${escapeHTML(item.status)}</span>
         </a>
         <div class="product-body">
           <div>
-            <h3><a href="product.html?id=${encodeURIComponent(item.id)}">${escapeHTML(item.productName)}</a></h3>
+            <h3><a href="product_details.html?id=${encodeURIComponent(item.id)}">${escapeHTML(item.productName)}</a></h3>
             <p>${escapeHTML(shortText(item.description, 96))}</p>
           </div>
           <div class="product-facts">
             <span class="price-pill">${escapeHTML(formatMoney(item.sellingPrice))}</span>
+            <span class="status-pill">Qty ${escapeHTML(item.quantityAvailable)}</span>
             <span class="status-pill">${escapeHTML(item.category)}</span>
             <span class="status-pill">${escapeHTML(item.condition)}</span>
           </div>
           <p class="muted">${escapeHTML(item.location)} - Listed ${escapeHTML(formatDate(item.createdAt))}</p>
         </div>
         <div class="product-actions">
-          <a class="button secondary" href="product.html?id=${encodeURIComponent(item.id)}">View Details</a>
+          <a class="button secondary" href="product_details.html?id=${encodeURIComponent(item.id)}">View Details</a>
           <button class="wishlist-button" type="button" data-wishlist-button="${escapeAttr(item.id)}" aria-pressed="false">Save</button>
         </div>
         ${ownerActions}
@@ -427,7 +433,6 @@
     if (!user) {
       return null;
     }
-
     const safeUser = { ...user };
     delete safeUser.password;
     return safeUser;
@@ -488,7 +493,6 @@
     if (!element) {
       return;
     }
-
     element.textContent = text;
     element.classList.remove("error", "success");
     if (type) {
@@ -500,9 +504,10 @@
     return new URLSearchParams(window.location.search).get(name);
   }
 
-  function addPurchase(product) {
+  function addPurchase(product, quantity) {
     const item = normalizeProduct(product);
     const user = getCurrentUser();
+    const count = Number(quantity || 1);
     const purchases = readJSON(PURCHASE_KEY, []);
     purchases.unshift({
       id: newId("purchase"),
@@ -510,7 +515,8 @@
       buyerName: user ? user.name : "Guest Buyer",
       productId: item.id,
       productName: item.productName,
-      price: item.sellingPrice,
+      quantity: count,
+      price: item.sellingPrice * count,
       sellerName: item.sellerName,
       purchaseDate: new Date().toISOString()
     });
@@ -527,7 +533,6 @@
         resolve("");
         return;
       }
-
       const reader = new FileReader();
       reader.onload = function () {
         resolve(reader.result);
@@ -600,12 +605,19 @@
   }
 
   async function fetchMyProducts() {
-    const data = await apiFetch("/products/mine");
-    return (data.products || []).map(normalizeProduct);
+    const user = getCurrentUser();
+    if (!user) {
+      return [];
+    }
+    const allProducts = await fetchProducts();
+    const userId = String(user.user_id || user.id);
+    return allProducts.filter(function (product) {
+      return String(product.sellerId) === userId;
+    });
   }
 
   async function createProduct(formData) {
-    const data = await apiFetch("/add-product", {
+    const data = await apiFetch("/products", {
       method: "POST",
       body: formData
     });
@@ -613,7 +625,9 @@
   }
 
   async function updateProductRemote(id, payload) {
-    const data = await apiFetch("/edit-product/" + encodeURIComponent(id), {
+    // BUG FIX: Checks if the passed object is already an explicit multipart FormData instance
+    const isFormData = payload instanceof FormData;
+    const data = await apiFetch("/products/" + encodeURIComponent(id), {
       method: "PUT",
       body: payload
     });
@@ -621,13 +635,17 @@
   }
 
   async function deleteProductRemote(id) {
-    return apiFetch("/delete-product/" + encodeURIComponent(id), { method: "DELETE" });
+    return apiFetch("/products/" + encodeURIComponent(id), { method: "DELETE" });
   }
 
-  async function confirmPurchaseRemote(productId) {
-    return apiFetch("/confirm-purchase", {
+  async function confirmPurchaseRemote(productId, quantity) {
+    const user = getCurrentUser();
+    return apiFetch("/products/" + encodeURIComponent(productId) + "/purchase", {
       method: "POST",
-      body: { product_id: productId }
+      body: {
+        buyer_id: user ? (user.user_id || user.id) : "",
+        quantity: Number(quantity || 1)
+      }
     });
   }
 
@@ -646,13 +664,12 @@
         method: "POST",
         body: credentials
       });
-      setAuth(publicUser(data.user), data.token);
-      return publicUser(data.user);
+      setAuth(data.user, data.token);
+      return data.user;
     } catch (error) {
       if (shouldUseLocalAuth(error)) {
         return loginUserLocal(credentials);
       }
-
       throw error;
     }
   }
@@ -663,13 +680,12 @@
         method: "POST",
         body: payload
       });
-      setAuth(publicUser(data.user), data.token);
-      return publicUser(data.user);
+      setAuth(data.user, data.token);
+      return data.user;
     } catch (error) {
       if (shouldUseLocalAuth(error)) {
         return registerUserLocal(payload);
       }
-
       throw error;
     }
   }
@@ -681,6 +697,15 @@
   async function fetchProfile() {
     const data = await apiFetch("/profile");
     setCurrentUser(data.user);
+    
+    const form = document.querySelector("[data-profile-form]");
+    if (form && data.user) {
+      form.elements.name.value = data.user.name || "";
+      form.elements.email.value = data.user.email || "";
+      form.elements.phone.value = data.user.phone || "";
+      if (form.elements.location) form.elements.location.value = data.user.location || "";
+      if (form.elements.bio) form.elements.bio.value = data.user.bio || "";
+    }
     return data.user;
   }
 
@@ -818,21 +843,19 @@
 
     form.elements.name.value = profile.name || "";
     form.elements.email.value = profile.email || "";
-    if (form.elements.phone) {
-      form.elements.phone.value = profile.phone || "";
-    }
-    if (form.elements.location) {
-      form.elements.location.value = profile.location || "";
-    }
-    if (form.elements.bio) {
-      form.elements.bio.value = profile.bio || "";
-    }
+    if (form.elements.phone) form.elements.phone.value = profile.phone || "";
+    if (form.elements.location) form.elements.location.value = profile.location || "";
+    if (form.elements.bio) form.elements.bio.value = profile.bio || "";
 
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
+      
       const updated = {
         name: form.elements.name.value.trim(),
-        email: form.elements.email.value.trim()
+        email: form.elements.email.value.trim(),
+        phone: form.elements.phone ? form.elements.phone.value.trim() : "",
+        location: form.elements.location ? form.elements.location.value.trim() : "",
+        bio: form.elements.bio ? form.elements.bio.value.trim() : ""
       };
 
       try {
@@ -860,8 +883,9 @@
 
     async function renderMine() {
       root.innerHTML = `<div class="empty-state"><p class="muted">Loading your products...</p></div>`;
+      const userId = String(user.user_id || user.id);
       const mine = getAuthToken() ? await fetchMyProducts() : getProducts().filter(function (product) {
-        return String(product.sellerId) === String(user.id);
+        return String(product.sellerId) === userId;
       });
       renderProductGrid(root, mine, { ownerActions: true });
     }
@@ -873,9 +897,7 @@
       if (deleteButton) {
         const id = deleteButton.dataset.deleteProduct;
         const ok = window.confirm("Delete this product?");
-        if (!ok) {
-          return;
-        }
+        if (!ok) return;
 
         try {
           if (getAuthToken()) {
@@ -893,20 +915,18 @@
 
       if (toggleButton) {
         const id = toggleButton.dataset.toggleStatus;
-        const nextStatus = toggleButton.textContent.includes("Available") ? "Available" : "Sold";
+        const targetProduct = getProductById(id);
+        const currentStatus = targetProduct ? targetProduct.status : "Available";
+        const nextStatus = currentStatus === "Available" ? "Sold" : "Available";
+        
         try {
           if (getAuthToken()) {
+            // BUG FIX: Match structural schema payload parameters
             await updateProductRemote(id, { status: nextStatus });
           } else {
             saveProducts(getProducts().map(function (product) {
-              if (String(product.id) !== String(id)) {
-                return product;
-              }
-
-              return {
-                ...product,
-                status: nextStatus
-              };
+              if (String(product.id) !== String(id)) return product;
+              return { ...product, status: nextStatus };
             }));
           }
           await renderMine();
@@ -936,63 +956,78 @@
       return;
     }
 
-    form.elements.productName.value = product.productName;
+    // Populate data handling targets smoothly
+    form.elements.product_name.value = product.productName;
     form.elements.description.value = product.description;
-    form.elements.category.value = product.category;
-    form.elements.condition.value = product.condition;
+    form.elements.category_name.value = product.category;
+    form.elements.product_condition.value = product.condition;
     form.elements.mrp.value = product.mrp;
-    form.elements.sellingPrice.value = product.sellingPrice;
+    form.elements.selling_price.value = product.sellingPrice;
+    form.elements.quantity_available.value = product.quantityAvailable;
     form.elements.location.value = product.location;
-    form.elements.contactNumber.value = product.contactNumber;
+    form.elements.contact_number.value = product.contactNumber;
     form.elements.status.value = product.status;
+
+    const imgPreview = document.getElementById("edit-image-preview");
+    if (imgPreview) {
+      imgPreview.src = product.image;
+    }
 
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
       const file = form.elements.image.files[0];
-      const formData = new FormData();
-      formData.append("product_name", form.elements.productName.value.trim());
-      formData.append("description", form.elements.description.value.trim());
-      formData.append("category", form.elements.category.value);
-      formData.append("condition", form.elements.condition.value);
-      formData.append("mrp", form.elements.mrp.value);
-      formData.append("selling_price", form.elements.sellingPrice.value);
-      formData.append("location", form.elements.location.value.trim());
-      formData.append("contact_number", form.elements.contactNumber.value.trim());
-      formData.append("status", form.elements.status.value);
-      if (file) {
-        formData.append("image", file);
-      }
+      
+      // BUG FIX: Handle explicit file form uploads to multipart-compatible nodes
+      if (getAuthToken()) {
+        const formData = new FormData();
+        formData.append("product_name", form.elements.product_name.value.trim());
+        formData.append("description", form.elements.description.value.trim());
+        formData.append("category_name", form.elements.category_name.value);
+        formData.append("product_condition", form.elements.product_condition.value);
+        formData.append("mrp", form.elements.mrp.value);
+        formData.append("selling_price", form.elements.selling_price.value);
+        formData.append("quantity_available", form.elements.quantity_available.value);
+        formData.append("location", form.elements.location.value.trim());
+        formData.append("contact_number", form.elements.contact_number.value.trim());
+        formData.append("status", form.elements.status.value);
+        if (file) formData.append("image", file);
 
-      try {
-        if (getAuthToken()) {
+        try {
           await updateProductRemote(product.id, formData);
-        } else {
-          const image = file ? await fileToDataUrl(file) : product.image;
-          const updated = {
-            ...product,
-            productName: form.elements.productName.value.trim(),
-            description: form.elements.description.value.trim(),
-            category: form.elements.category.value,
-            condition: form.elements.condition.value,
-            mrp: Number(form.elements.mrp.value),
-            sellingPrice: Number(form.elements.sellingPrice.value),
-            location: form.elements.location.value.trim(),
-            contactNumber: form.elements.contactNumber.value.trim(),
-            status: form.elements.status.value,
-            image: image || FALLBACK_IMAGE
-          };
-          saveProducts(getProducts().map(function (item) {
-            return String(item.id) === String(product.id) ? updated : item;
-          }));
+          setMessage(message, "Product updated remotely.", "success");
+          window.setTimeout(function () { window.location.href = "my_products.html"; }, 700);
+          return;
+        } catch (error) {
+          setMessage(message, error.message || "Product update failed.", "error");
+          return;
         }
-
-        setMessage(message, "Product updated.", "success");
-        window.setTimeout(function () {
-          window.location.href = "my-products.html";
-        }, 700);
-      } catch (error) {
-        setMessage(message, error.message || "Product update failed.", "error");
       }
+
+      // Local storage alignment fallback processing
+      const image = file ? await fileToDataUrl(file) : product.image;
+      const updated = {
+        ...product,
+        productName: form.elements.product_name.value.trim(),
+        description: form.elements.description.value.trim(),
+        category: form.elements.category_name.value,
+        condition: form.elements.product_condition.value,
+        mrp: Number(form.elements.mrp.value),
+        sellingPrice: Number(form.elements.selling_price.value),
+        quantityAvailable: Number(form.elements.quantity_available.value),
+        location: form.elements.location.value.trim(),
+        contactNumber: form.elements.contact_number.value.trim(),
+        status: form.elements.status.value,
+        image: image || FALLBACK_IMAGE
+      };
+
+      saveProducts(getProducts().map(function (item) {
+        return String(item.id) === String(product.id) ? updated : item;
+      }));
+
+      setMessage(message, "Product updated locally.", "success");
+      window.setTimeout(function () {
+        window.location.href = "my_products.html";
+      }, 700);
     });
   }
 

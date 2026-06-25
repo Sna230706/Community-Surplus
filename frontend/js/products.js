@@ -83,8 +83,20 @@ document.addEventListener("DOMContentLoaded", async function () {
       });
     }
 
+    // BUG FIX: Prevent NaN subtraction breaks on alphanumeric string IDs
     return copy.sort(function (a, b) {
-      return Number(b.id) - Number(a.id) || new Date(b.createdAt) - new Date(a.createdAt);
+      const numA = Number(a.id);
+      const numB = Number(b.id);
+      
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return numB - numA;
+      }
+      
+      // Fallback safely to timestamps, then string comparisons
+      const dateDiff = new Date(b.createdAt) - new Date(a.createdAt);
+      if (dateDiff !== 0) return dateDiff;
+      
+      return String(b.id).localeCompare(String(a.id));
     });
   }
 
