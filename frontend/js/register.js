@@ -7,9 +7,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   const message = document.querySelector("[data-form-message]");
+  const submitButton = form.querySelector("button[type='submit']");
 
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
+    
     const name = form.elements.name.value.trim();
     const email = form.elements.email.value.trim().toLowerCase();
     const phone = form.elements.phone.value.trim();
@@ -27,6 +29,11 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    // BUG FIX: Disable the submit button to prevent accidental duplicate account requests
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
+
     const payload = {
       name,
       email,
@@ -37,11 +44,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       await window.CS.registerUser(payload);
-      window.CS.setMessage(message, "Account created.", "success");
+      window.CS.setMessage(message, "Account created successfully.", "success");
+      
       window.setTimeout(function () {
         window.location.href = "dashboard.html";
       }, 500);
     } catch (error) {
+      // BUG FIX: Re-enable the submit button on failure so the user can try again
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
       window.CS.setMessage(message, error.message || "Account creation failed.", "error");
     }
   });

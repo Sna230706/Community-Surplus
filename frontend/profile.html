@@ -41,12 +41,24 @@
     <form class="form-panel" data-profile-form>
       <div class="form-grid">
         <label class="field">
-          <span>Name</span>
+          <span>Full Name</span>
           <input name="name" type="text" required>
         </label>
         <label class="field">
-          <span>Email</span>
-          <input name="email" type="email" required>
+          <span>Email Address</span>
+          <input name="email" type="email" required readonly>
+        </label>
+        <label class="field">
+          <span>Phone Number</span>
+          <input name="phone" type="tel">
+        </label>
+        <label class="field">
+          <span>Location</span>
+          <input name="location" type="text">
+        </label>
+        <label class="field">
+          <span>Bio</span>
+          <textarea name="bio"></textarea>
         </label>
       </div>
       <button class="button" type="submit">Save Profile</button>

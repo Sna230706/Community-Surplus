@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Community Surplus | Add or Edit Product</title>
+  <title>Community Surplus | Edit Product</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/navbar.css">
   <link rel="stylesheet" href="css/forms.css">
@@ -40,14 +40,17 @@
     </div>
 
     <form class="form-panel" data-edit-product-form>
+      <input type="hidden" name="product_id">
+
       <div class="form-grid">
         <label class="field">
           <span>Product Name</span>
-          <input name="productName" type="text" required>
+          <input name="product_name" type="text" required>
         </label>
+        
         <label class="field">
           <span>Category</span>
-          <select name="category" required>
+          <select name="category_name" required>
             <option value="Furniture">Furniture</option>
             <option value="Books">Books</option>
             <option value="Appliances">Appliances</option>
@@ -57,15 +60,16 @@
             <option value="Other">Other</option>
           </select>
         </label>
+        
         <label class="field">
           <span>Condition</span>
-          <select name="condition" required>
+          <select name="product_condition" required>
             <option value="Like New">Like New</option>
             <option value="Good">Good</option>
             <option value="Used">Used</option>
-            <option value="Needs Repair">Needs Repair</option>
           </select>
         </label>
+        
         <label class="field">
           <span>Status</span>
           <select name="status" required>
@@ -73,31 +77,44 @@
             <option value="Sold">Sold</option>
           </select>
         </label>
+        
         <label class="field">
           <span>Original MRP</span>
           <input name="mrp" type="number" min="0" required>
         </label>
+        
         <label class="field">
           <span>Selling Price</span>
-          <input name="sellingPrice" type="number" min="0" required>
+          <input name="selling_price" type="number" min="0" required>
         </label>
+        
+        <label class="field">
+          <span>Quantity Available</span>
+          <input name="quantity_available" type="number" min="1" step="1" required>
+        </label>
+        
         <label class="field">
           <span>Replace Image</span>
+          <img id="edit-image-preview" src="images/placeholder.svg" alt="Preview" style="max-width: 80px; margin-bottom: 0.5rem; display: block;">
           <input name="image" type="file" accept="image/*">
         </label>
+        
         <label class="field">
           <span>Location</span>
           <input name="location" type="text" required>
         </label>
+        
         <label class="field">
           <span>Contact Number</span>
-          <input name="contactNumber" type="tel" required>
+          <input name="contact_number" type="tel" required>
         </label>
+        
         <label class="field full">
           <span>Description</span>
           <textarea name="description" required></textarea>
         </label>
       </div>
+      
       <button class="button" type="submit">Save Product</button>
       <p class="form-message" data-form-message></p>
     </form>

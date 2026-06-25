@@ -41,12 +41,13 @@
       <div class="form-grid">
         <label class="field">
           <span>Product Name</span>
-          <input name="productName" type="text" required>
+          <input name="product_name" type="text" required>
         </label>
+        
         <label class="field">
           <span>Category</span>
-          <select name="category"  required>
-            <option value="" disabled selected>Choose Category</option>
+          <select name="category_name" required>
+            <option value="">-- Select Category --</option>
             <option value="Furniture">Furniture</option>
             <option value="Books">Books</option>
             <option value="Appliances">Appliances</option>
@@ -56,36 +57,47 @@
             <option value="Other">Other</option>
           </select>
         </label>
+        
         <label class="field">
           <span>Condition</span>
-          <select name="condition" required>
+          <select name="product_condition" required>
             <option value="" disabled selected>Choose Condition</option>
             <option value="Like New">Like New</option>
             <option value="Good">Good</option>
             <option value="Used">Used</option>
-            <option value="Needs Repair">Needs Repair</option>
           </select>
         </label>
+        
         <label class="field">
           <span>Original MRP</span>
           <input name="mrp" type="number" min="0" required>
         </label>
+        
         <label class="field">
           <span>Selling Price</span>
-          <input name="sellingPrice" type="number" min="0" required>
+          <input name="selling_price" type="number" min="0" required>
         </label>
+        
+        <label class="field">
+          <span>Quantity Available</span>
+          <input name="quantity_available" type="number" min="1" step="1" value="1" required>
+        </label>
+        
         <label class="field">
           <span>Product Image</span>
           <input name="image" type="file" accept="image/*">
         </label>
+        
         <label class="field">
           <span>Location</span>
           <input name="location" type="text" required>
         </label>
+        
         <label class="field">
           <span>Contact Number</span>
-          <input name="contactNumber" type="tel" required>
+          <input name="contact_number" type="tel" required>
         </label>
+        
         <label class="field full">
           <span>Description</span>
           <textarea name="description" required></textarea>
