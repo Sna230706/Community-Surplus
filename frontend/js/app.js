@@ -48,9 +48,9 @@
     {
       // BUG FIX: Updated to match your current project scope category change
       id: "p-books",
-      productName: "Engineering Stationary Set",
-      description: "Reference stationary tools and items for first-year engineering subjects in clean condition.",
-      category: "Stationary",
+      productName: "Engineering Stationery Set",
+      description: "Reference stationery tools and items for first-year engineering subjects in clean condition.",
+      category: "Stationery",
       condition: "Like New",
       mrp: 3600,
       sellingPrice: 900,
@@ -345,13 +345,13 @@
 
     return `
       <article class="product-card${sold ? " is-sold" : ""}" data-product-card="${escapeAttr(item.id)}">
-        <a class="product-media" href="product.html?id=${encodeURIComponent(item.id)}">
+        <a class="product-media" href="product_details.html?id=${encodeURIComponent(item.id)}">
           <img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.productName)}">
           <span class="product-badge">${escapeHTML(item.status)}</span>
         </a>
         <div class="product-body">
           <div>
-            <h3><a href="product.html?id=${encodeURIComponent(item.id)}">${escapeHTML(item.productName)}</a></h3>
+            <h3><a href="product_details.html?id=${encodeURIComponent(item.id)}">${escapeHTML(item.productName)}</a></h3>
             <p>${escapeHTML(shortText(item.description, 96))}</p>
           </div>
           <div class="product-facts">
@@ -363,7 +363,7 @@
           <p class="muted">${escapeHTML(item.location)} - Listed ${escapeHTML(formatDate(item.createdAt))}</p>
         </div>
         <div class="product-actions">
-          <a class="button secondary" href="product.html?id=${encodeURIComponent(item.id)}">View Details</a>
+          <a class="button secondary" href="product_details.html?id=${encodeURIComponent(item.id)}">View Details</a>
           <button class="wishlist-button" type="button" data-wishlist-button="${escapeAttr(item.id)}" aria-pressed="false">Save</button>
         </div>
         ${ownerActions}
@@ -624,15 +624,19 @@
     return normalizeProduct(data.product);
   }
 
-  async function updateProductRemote(id, payload) {
-    // BUG FIX: Checks if the passed object is already an explicit multipart FormData instance
-    const isFormData = payload instanceof FormData;
-    const data = await apiFetch("/products/" + encodeURIComponent(id), {
+ async function updateProductRemote(id, payload) {
+
+  const data = await apiFetch(
+    "/products/" + encodeURIComponent(id),
+    {
       method: "PUT",
       body: payload
-    });
-    return normalizeProduct(data.product);
-  }
+    }
+  );
+
+  return normalizeProduct(data.product);
+
+}
 
   async function deleteProductRemote(id) {
     return apiFetch("/products/" + encodeURIComponent(id), { method: "DELETE" });
@@ -643,7 +647,6 @@
     return apiFetch("/products/" + encodeURIComponent(productId) + "/purchase", {
       method: "POST",
       body: {
-        buyer_id: user ? (user.user_id || user.id) : "",
         quantity: Number(quantity || 1)
       }
     });

@@ -3,82 +3,189 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 
-const JWT_SECRET = process.env.JWT_SECRET || "community_surplus_super_secret_key_2026";
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  "community_surplus_super_secret_key_2026";
+
+// =====================================================
+// VERIFY JWT
+// =====================================================
 
 const verifyToken = (req, res, next) => {
+
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Access denied. Please log in to manage your wishlist." });
+    return res.status(401).json({
+      message: "Access denied. Please login."
+    });
   }
 
   try {
+
     const verified = jwt.verify(token, JWT_SECRET);
+
     req.user = verified;
+
     next();
-  } catch (err) {
-    res.status(400).json({ message: "Invalid or expired session token." });
+
+  } catch (error) {
+
+    return res.status(401).json({
+      message: "Invalid or expired token."
+    });
+
   }
+
 };
 
+// =====================================================
+// GET WISHLIST
+// GET /api/wishlist
+// =====================================================
+
 router.get("/", verifyToken, async (req, res) => {
+
   try {
+
     const [products] = await pool.query(
-      `SELECT p.*, u.name AS seller_name 
-       FROM wishlists w 
-       JOIN products p ON w.product_id = p.product_id 
-       JOIN users u ON p.seller_id = u.id 
-       WHERE w.user_id = ? 
-       ORDER BY p.product_id DESC`,
-      [req.user.id]
+      `
+      SELECT
+        p.*,
+        c.category_name,
+        u.name AS seller_name,
+        pi.image_url
+
+      FROM wishlist w
+
+      JOIN products p
+        ON w.product_id = p.product_id
+
+      JOIN users u
+        ON p.seller_id = u.user_id
+
+      JOIN categories c
+        ON p.category_id = c.category_id
+
+      LEFT JOIN (
+          SELECT product_id, MIN(image_url) AS image_url
+          FROM product_images
+          GROUP BY product_id
+      ) pi
+        ON p.product_id = pi.product_id
+
+      WHERE w.user_id = ?
+
+      ORDER BY p.product_id DESC
+      `,
+      [req.user.user_id]
     );
 
-    res.json({ products });
+    res.json({
+      products
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Failed to retrieve your wishlist items.", error: error.message });
+
+    res.status(500).json({
+      message: "Failed to retrieve wishlist.",
+      error: error.message
+    });
+
   }
+
 });
 
+// =====================================================
+// ADD TO WISHLIST
+// POST /api/wishlist/add
+// =====================================================
+
 router.post("/add", verifyToken, async (req, res) => {
+
   try {
+
     const { product_id } = req.body;
 
     if (!product_id) {
-      return res.status(400).json({ message: "Missing product_id field in payload." });
+      return res.status(400).json({
+        message: "Product ID is required."
+      });
     }
 
-    const [duplicates] = await pool.query(
-      "SELECT * FROM wishlists WHERE user_id = ? AND product_id = ?",
-      [req.user.id, product_id]
+    const [existing] = await pool.query(
+      `
+      SELECT wishlist_id
+      FROM wishlist
+      WHERE user_id = ?
+      AND product_id = ?
+      `,
+      [req.user.user_id, product_id]
     );
 
-    if (duplicates.length === 0) {
+    if (existing.length === 0) {
+
       await pool.query(
-        "INSERT INTO wishlists (user_id, product_id) VALUES (?, ?)",
-        [req.user.id, product_id]
+        `
+        INSERT INTO wishlist
+        (
+          user_id,
+          product_id
+        )
+        VALUES (?, ?)
+        `,
+        [req.user.user_id, product_id]
       );
+
     }
 
-    res.status(201).json({ message: "Item successfully saved to wishlist." });
+    res.status(201).json({
+      message: "Product added to wishlist."
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Failed to save item.", error: error.message });
+
+    res.status(500).json({
+      message: "Failed to add wishlist item.",
+      error: error.message
+    });
+
   }
+
 });
 
+// =====================================================
+// REMOVE FROM WISHLIST
+// DELETE /api/wishlist/remove/:id
+// =====================================================
+
 router.delete("/remove/:id", verifyToken, async (req, res) => {
+
   try {
-    const productId = req.params.id;
 
     await pool.query(
-      "DELETE FROM wishlists WHERE user_id = ? AND product_id = ?",
-      [req.user.id, productId]
+      `
+      DELETE FROM wishlist
+      WHERE user_id = ?
+      AND product_id = ?
+      `,
+      [req.user.user_id, req.params.id]
     );
 
-    res.json({ message: "Item successfully removed from wishlist." });
+    res.json({
+      message: "Wishlist item removed."
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Failed to unsave item.", error: error.message });
+
+    res.status(500).json({
+      message: "Failed to remove wishlist item.",
+      error: error.message
+    });
+
   }
+
 });
 
 module.exports = router;
