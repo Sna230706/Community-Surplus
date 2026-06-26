@@ -48,9 +48,9 @@
     {
       // BUG FIX: Updated to match your current project scope category change
       id: "p-books",
-      productName: "Engineering Stationary Set",
-      description: "Reference stationary tools and items for first-year engineering subjects in clean condition.",
-      category: "Stationary",
+      productName: "Engineering Stationery Set",
+      description: "Reference stationery tools and items for first-year engineering subjects in clean condition.",
+      category: "Stationery",
       condition: "Like New",
       mrp: 3600,
       sellingPrice: 900,
@@ -624,15 +624,19 @@
     return normalizeProduct(data.product);
   }
 
-  async function updateProductRemote(id, payload) {
-    // BUG FIX: Checks if the passed object is already an explicit multipart FormData instance
-    const isFormData = payload instanceof FormData;
-    const data = await apiFetch("/products/" + encodeURIComponent(id), {
+ async function updateProductRemote(id, payload) {
+
+  const data = await apiFetch(
+    "/products/" + encodeURIComponent(id),
+    {
       method: "PUT",
       body: payload
-    });
-    return normalizeProduct(data.product);
-  }
+    }
+  );
+
+  return normalizeProduct(data.product);
+
+}
 
   async function deleteProductRemote(id) {
     return apiFetch("/products/" + encodeURIComponent(id), { method: "DELETE" });
@@ -643,7 +647,6 @@
     return apiFetch("/products/" + encodeURIComponent(productId) + "/purchase", {
       method: "POST",
       body: {
-        buyer_id: user ? (user.user_id || user.id) : "",
         quantity: Number(quantity || 1)
       }
     });

@@ -86,7 +86,20 @@ document.addEventListener("DOMContentLoaded", async function () {
         window.CS.setMessage(message, "Please choose a valid purchase quantity based on available seller stock.", "error");
         return;
       }
+      
+      if (!window.CS.getAuthToken()) {
+  window.CS.setMessage(
+    message,
+    "Please login before purchasing.",
+    "error"
+  );
 
+  setTimeout(function () {
+    window.location.href = "login.html";
+  }, 1000);
+
+  return;
+}
       confirmButton.disabled = true;
       if (qtyInput) qtyInput.disabled = true;
 
@@ -98,6 +111,15 @@ document.addEventListener("DOMContentLoaded", async function () {
         window.CS.addPurchase(product, chosenQuantity);
         
         window.CS.setMessage(message, "Purchase confirmed in MySQL. The item inventory status has updated.", "success");
+        setTimeout(function () {
+    location.reload();
+}, 1000);
+        confirmButton.textContent = "Purchased";
+confirmButton.disabled = true;
+
+if (qtyInput) {
+    qtyInput.disabled = true;
+}
       } catch (error) {
         confirmButton.disabled = false;
         if (qtyInput) qtyInput.disabled = false;

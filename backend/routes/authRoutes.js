@@ -14,7 +14,7 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Name, email, and password are required fields." });
     }
 
-    const [existingUsers] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
+    const [existingUsers] = await pool.query("SELECT user_id FROM users WHERE email = ?", [email]);
     if (existingUsers.length > 0) {
       return res.status(400).json({ message: "An account with this email already exists." });
     }
@@ -28,12 +28,12 @@ router.post("/register", async (req, res) => {
     );
 
     const userId = result.insertId;
-    const token = jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign({ user_id: userId }, JWT_SECRET, { expiresIn: "7d" });
 
     res.status(201).json({
       message: "Registration successful",
       token,
-      user: { id: userId, name, email, phone, location, bio: "" }
+      user: { id: userId, user_id: userId, name, email, phone, location, bio: "" }
     });
   } catch (error) {
     res.status(500).json({ message: "Server error during registration.", error: error.message });
@@ -59,13 +59,14 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password." });
     }
 
-    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign({ user_id: user.user_id }, JWT_SECRET, { expiresIn: "7d" });
 
     res.json({
       message: "Login successful",
       token,
       user: {
-        id: user.id,
+        id: user.user_id,
+        user_id: user.user_id,
         name: user.name,
         email: user.email,
         phone: user.phone,
@@ -95,10 +96,22 @@ const verifyToken = (req, res, next) => {
 
 router.get("/profile", verifyToken, async (req, res) => {
   try {
-    const [users] = await pool.query("SELECT id, name, email, phone, location, bio FROM users WHERE id = ?", [req.user.id]);
+    const [users] = await pool.query("SELECT user_id, name, email, phone, location, bio FROM users WHERE user_id = ?", [req.user.user_id]);
     if (users.length === 0) return res.status(404).json({ message: "User profile not found." });
     
-    res.json({ user: users[0] });
+    const user = users[0];
+
+res.json({
+  user: {
+    id: user.user_id,
+    user_id: user.user_id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    location: user.location,
+    bio: user.bio
+  }
+});
   } catch (error) {
     res.status(500).json({ message: "Error fetching profile information.", error: error.message });
   }
@@ -109,12 +122,12 @@ router.put("/profile", verifyToken, async (req, res) => {
     const { name, email, phone, location, bio } = req.body;
 
     await pool.query(
-      "UPDATE users SET name = ?, email = ?, phone = ?, location = ?, bio = ? WHERE id = ?",
-      [name, email, phone, location, bio, req.user.id]
+      "UPDATE users SET name = ?, email = ?, phone = ?, location = ?, bio = ? WHERE user_id = ?",
+      [name, email, phone, location, bio, req.user.user_id]
     );
 
     res.json({
-      user: { id: req.user.id, name, email, phone, location, bio }
+      user: { id: req.user.user_id, user_id: req.user.user_id, name,email, phone, location, bio }
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to update profile records.", error: error.message });

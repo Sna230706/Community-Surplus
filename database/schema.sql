@@ -12,7 +12,7 @@ CREATE TABLE users (
 
     email VARCHAR(100) NOT NULL UNIQUE,
 
-    password_hash VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
 
     phone VARCHAR(15),
 
@@ -36,7 +36,7 @@ CREATE TABLE categories (
 INSERT INTO categories (category_name)
 VALUES
 ('Furniture'),
-('Books'),
+('Stationery'),
 ('Appliances'),
 ('Electronics'),
 ('Vehicles'),
@@ -61,8 +61,7 @@ CREATE TABLE products (
     product_condition ENUM(
         'Like New',
         'Good',
-        'Used',
-        'Needs Repair'
+        'Used'
     ) NOT NULL,
 
     mrp DECIMAL(10,2),
