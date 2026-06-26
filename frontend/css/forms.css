@@ -31,12 +31,11 @@
 .form-panel {
   display: grid;
   gap: 20px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius-shop); 
   background: var(--surface);
   padding: 32px; 
-  /* Applied the prominent blurred black shadow to grab attention */
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--clay-card);
 }
 
 .form-grid {
@@ -58,8 +57,8 @@
 /* Field Text Labels */
 .field span {
   color: var(--ink);
-  font-size: 1.05rem; /* Increased font size for clarity */
-  font-weight: 600; 
+  font-size: 1.05rem; 
+  font-weight: 700; 
 }
 
 /* ==========================================================================
@@ -69,19 +68,20 @@ input,
 select,
 textarea {
   width: 100%;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius-shop);
-  background: var(--bg); 
+  background: #f0f4ff; 
   color: var(--ink);
-  padding: 14px 18px; /* Slightly expanded padding to match larger text */
+  padding: 14px 20px; 
   outline: none;
-  font-size: 1.15rem; /* Increased font size inside the input boxes */
-  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  font-size: 1.1rem; 
+  box-shadow: var(--clay-inset);
+  transition: all 200ms ease;
 }
 
 input::placeholder,
 textarea::placeholder {
-  font-size: 1.15rem; /* Ensures placeholder text size matches input font size */
+  font-size: 1.1rem; 
 }
 
 textarea {
@@ -89,13 +89,12 @@ textarea {
   resize: vertical;
 }
 
-/* Focus States Utilizing Richer Coffee Tones */
+/* Focus States Utilizing Royal Blue Focus Rings */
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--green-dark); /* Switched focus ring accent to dark coffee */
   background: var(--surface); 
-  box-shadow: var(--ring);
+  box-shadow: var(--clay-inset), var(--ring);
 }
 
 /* ==========================================================================
@@ -106,16 +105,20 @@ textarea:focus {
   margin: 0;
   color: var(--muted);
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Validation State Colors Overwrite */
 .form-message.error {
-  color: var(--danger); 
+  color: #dc2626; 
+}
+
+.form-message.warning {
+  color: #dc2626;
 }
 
 .form-message.success {
-  color: #7c5c43; /* Darker coffee brown for successful/valid text indicators */
+  color: var(--green-dark); 
 }
 
 /* ==========================================================================
