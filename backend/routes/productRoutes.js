@@ -186,6 +186,8 @@ ON p.product_id = pi.product_id
 router.post("/", upload.single("image"), async (req, res) => {
 
   try {
+    console.log("BODY:", req.body);
+    console.log("FILE:",req.file);
 
     const {
       seller_id,
@@ -333,7 +335,7 @@ ON p.product_id = pi.product_id
     });
 
   } catch (error) {
-
+    console.error("create product error:" ,error);
     res.status(500).json({
       message: "Failed to save marketplace item.",
       error: error.message
