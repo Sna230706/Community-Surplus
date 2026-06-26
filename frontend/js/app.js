@@ -201,7 +201,7 @@
   function normalizeProduct(product) {
     let image = product.image || product.image_url || FALLBACK_IMAGE;
     if (image && image.startsWith("/uploads/")) {
-      image = API_BASE_URL + image;
+      image = API_BASE_URL.replace("/api","") + image;
     }
 
     return {
@@ -345,13 +345,13 @@
 
     return `
       <article class="product-card${sold ? " is-sold" : ""}" data-product-card="${escapeAttr(item.id)}">
-        <a class="product-media" href="product_details.html?id=${encodeURIComponent(item.id)}">
+        <a class="product-media" href="product.html?id=${encodeURIComponent(item.id)}">
           <img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.productName)}">
           <span class="product-badge">${escapeHTML(item.status)}</span>
         </a>
         <div class="product-body">
           <div>
-            <h3><a href="product_details.html?id=${encodeURIComponent(item.id)}">${escapeHTML(item.productName)}</a></h3>
+            <h3><a href="product.html?id=${encodeURIComponent(item.id)}">${escapeHTML(item.productName)}</a></h3>
             <p>${escapeHTML(shortText(item.description, 96))}</p>
           </div>
           <div class="product-facts">
@@ -363,7 +363,7 @@
           <p class="muted">${escapeHTML(item.location)} - Listed ${escapeHTML(formatDate(item.createdAt))}</p>
         </div>
         <div class="product-actions">
-          <a class="button secondary" href="product_details.html?id=${encodeURIComponent(item.id)}">View Details</a>
+          <a class="button secondary" href="product.html?id=${encodeURIComponent(item.id)}">View Details</a>
           <button class="wishlist-button" type="button" data-wishlist-button="${escapeAttr(item.id)}" aria-pressed="false">Save</button>
         </div>
         ${ownerActions}
