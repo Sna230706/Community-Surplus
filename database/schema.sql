@@ -85,7 +85,7 @@ CREATE TABLE products (
     ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (seller_id)
-        REFERENCES users(user_id),
+        REFERENCES users(user_id) ON DELETE CASCADE,
 
     FOREIGN KEY (category_id)
         REFERENCES categories(category_id)
@@ -105,7 +105,7 @@ CREATE TABLE product_images (
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (product_id)
-        REFERENCES products(product_id)
+        REFERENCES products(product_id) ON DELETE CASCADE
 );
 
 -- =========================
@@ -125,9 +125,9 @@ CREATE TABLE wishlist (
         REFERENCES users(user_id),
 
     FOREIGN KEY (product_id)
-        REFERENCES products(product_id),
+        REFERENCES products(product_id) ON DELETE CASCADE,
     
-    UNIQUE (user_id, product_id
+    UNIQUE (user_id, product_id)
 );
 
 -- =========================
