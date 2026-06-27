@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function render(isInitialLoad) {
     // Only show the disruptive "Loading..." state on the very first page mount
     if (isInitialLoad === true) {
-      root.innerHTML = `<div class="empty-state"><p class="muted">Loading wishlist from MySQL...</p></div>`;
+      root.innerHTML = `<div class="empty-state"><p class="muted">Loading wishlist...</p></div>`;
     }
     
     let products = [];

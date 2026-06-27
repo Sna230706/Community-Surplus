@@ -65,6 +65,7 @@ router.get("/", async (req, res) => {
     const [products] = await pool.query(`
       SELECT
         p.product_id,
+        p.seller_id,
         p.product_name,
         p.description,
         p.product_condition,
@@ -124,6 +125,7 @@ router.get("/:id", async (req, res) => {
       `
       SELECT
         p.product_id,
+        p.seller_id,
         p.product_name,
         p.description,
         p.product_condition,
@@ -296,6 +298,7 @@ router.post("/", upload.single("image"), async (req, res) => {
       `
       SELECT
         p.product_id,
+        p.seller_id,
         p.product_name,
         p.description,
         p.product_condition,
@@ -415,6 +418,7 @@ router.put("/:id", upload.single("image"), async (req,res)=>{
       `
       SELECT
         p.product_id,
+        p.seller_id,
         p.product_name,
         p.description,
         p.product_condition,

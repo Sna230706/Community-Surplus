@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         // Local state sync tracker recording
         window.CS.addPurchase(product, chosenQuantity);
         
-        window.CS.setMessage(message, "Purchase confirmed in MySQL. The item inventory status has updated.", "success");
+        window.CS.setMessage(message, "Purchase confirmed. The item inventory status has updated.", "success");
         setTimeout(function () {
     location.reload();
 }, 1000);

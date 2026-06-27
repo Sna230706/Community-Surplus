@@ -10,124 +10,6 @@
   const API_BASE_URL = "http://localhost:5000/api";
   const FALLBACK_IMAGE = "images/placeholder.svg";
 
-  const sampleProducts = [
-    {
-      id: "p-study-table",
-      productName: "Wooden Study Table",
-      description: "Compact table with two drawers, useful for students and home office setups.",
-      category: "Furniture",
-      condition: "Good",
-      mrp: 4500,
-      sellingPrice: 1800,
-      quantityAvailable: 1,
-      image: "images/table.svg",
-      location: "Ameerpet",
-      contactNumber: "9876543210",
-      status: "Available",
-      sellerId: "user-demo",
-      sellerName: "Demo Seller",
-      createdAt: "2026-06-12"
-    },
-    {
-      id: "p-bicycle",
-      productName: "City Bicycle",
-      description: "Single-speed bicycle with recently replaced brake pads.",
-      category: "Vehicles",
-      condition: "Used",
-      mrp: 8500,
-      sellingPrice: 3200,
-      quantityAvailable: 1,
-      image: "images/cycle.svg",
-      location: "Begumpet",
-      contactNumber: "9876501234",
-      status: "Available",
-      sellerId: "user-demo",
-      sellerName: "Demo Seller",
-      createdAt: "2026-06-10"
-    },
-    {
-      // BUG FIX: Updated to match your current project scope category change
-      id: "p-books",
-      productName: "Engineering Stationery Set",
-      description: "Reference stationery tools and items for first-year engineering subjects in clean condition.",
-      category: "Stationery",
-      condition: "Like New",
-      mrp: 3600,
-      sellingPrice: 900,
-      quantityAvailable: 4,
-      image: "images/books.svg",
-      location: "Kukatpally",
-      contactNumber: "9876512345",
-      status: "Available",
-      sellerId: "user-guest",
-      sellerName: "Riya Sharma",
-      createdAt: "2026-06-09"
-    },
-    {
-      id: "p-mixer",
-      productName: "Kitchen Mixer",
-      description: "Working mixer grinder with two jars. Best for a hostel or shared flat.",
-      category: "Appliances",
-      condition: "Good",
-      mrp: 2800,
-      sellingPrice: 1200,
-      quantityAvailable: 1,
-      image: "images/mixer.svg",
-      location: "Madhapur",
-      contactNumber: "9876523456",
-      status: "Available",
-      sellerId: "user-guest",
-      sellerName: "Riya Sharma",
-      createdAt: "2026-06-08"
-    },
-    {
-      id: "p-chair",
-      productName: "Office Chair",
-      description: "Adjustable chair with smooth wheels and comfortable back support.",
-      category: "Furniture",
-      condition: "Good",
-      mrp: 6500,
-      sellingPrice: 2400,
-      quantityAvailable: 2,
-      image: "images/chair.svg",
-      location: "Gachibowli",
-      contactNumber: "9876534567",
-      status: "Available",
-      sellerId: "user-demo",
-      sellerName: "Demo Seller",
-      createdAt: "2026-06-07"
-    },
-    {
-      id: "p-lamp",
-      productName: "Desk Lamp",
-      description: "Warm desk lamp with adjustable neck and low power usage.",
-      category: "Home",
-      condition: "Like New",
-      mrp: 1600,
-      sellingPrice: 650,
-      quantityAvailable: 1,
-      image: "images/lamp.svg",
-      location: "Secunderabad",
-      contactNumber: "9876545678",
-      status: "Available",
-      sellerId: "user-guest",
-      sellerName: "Riya Sharma",
-      createdAt: "2026-06-06"
-    }
-  ];
-
-  const sampleUsers = [
-    {
-      id: "user-demo",
-      name: "Demo Seller",
-      email: "demo@community.test",
-      password: "demo123",
-      phone: "9876543210",
-      location: "Ameerpet",
-      bio: "Listing useful items for the neighborhood."
-    }
-  ];
-
   function storageGet(key) {
     try {
       return window.localStorage.getItem(key);
@@ -170,10 +52,10 @@
 
   function seedData() {
     if (!storageGet(PRODUCT_KEY)) {
-      writeJSON(PRODUCT_KEY, sampleProducts);
+      writeJSON(PRODUCT_KEY, []);
     }
     if (!storageGet(USERS_KEY)) {
-      writeJSON(USERS_KEY, sampleUsers);
+      writeJSON(USERS_KEY, []);
     }
   }
 
@@ -924,8 +806,21 @@
         
         try {
           if (getAuthToken()) {
-            // BUG FIX: Match structural schema payload parameters
-            await updateProductRemote(id, { status: nextStatus });
+            if (!targetProduct) {
+              throw new Error("Product details are not available.");
+            }
+            await updateProductRemote(id, {
+              product_name: targetProduct.productName,
+              description: targetProduct.description,
+              category_name: targetProduct.category,
+              product_condition: targetProduct.condition,
+              mrp: targetProduct.mrp,
+              selling_price: targetProduct.sellingPrice,
+              quantity_available: targetProduct.quantityAvailable,
+              location: targetProduct.location,
+              contact_number: targetProduct.contactNumber,
+              status: nextStatus
+            });
           } else {
             saveProducts(getProducts().map(function (product) {
               if (String(product.id) !== String(id)) return product;

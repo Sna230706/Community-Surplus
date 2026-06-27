@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       // Passes the FormData object cleanly into your optimized app.js network controller
       await window.CS.createProduct(formData);
-      window.CS.setMessage(message, "Product added to MySQL marketplace.", "success");
+      window.CS.setMessage(message, "Product added to marketplace.", "success");
       form.reset();
       
       window.setTimeout(function () {
