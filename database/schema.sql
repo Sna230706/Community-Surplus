@@ -125,7 +125,9 @@ CREATE TABLE wishlist (
         REFERENCES users(user_id),
 
     FOREIGN KEY (product_id)
-        REFERENCES products(product_id)
+        REFERENCES products(product_id),
+    
+    UNIQUE (user_id, product_id
 );
 
 -- =========================
