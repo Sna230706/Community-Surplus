@@ -7,7 +7,7 @@
   const CURRENT_USER_KEY = "community_surplus_current_user_v1";
   const TOKEN_KEY = "community_surplus_token_v1";
   const PURCHASE_KEY = "community_surplus_purchases_v1";
-  const API_BASE_URL = "http://localhost:5000/api";
+  const API_BASE_URL = "https://community-surplus-production.up.railway.app/api";
   const FALLBACK_IMAGE = "images/placeholder.svg";
 
   function storageGet(key) {
