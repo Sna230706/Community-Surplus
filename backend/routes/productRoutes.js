@@ -230,6 +230,9 @@ ON p.product_id = pi.product_id
 router.post("/", verifyToken, upload.single("image"), async (req, res) => {
 
   try {
+
+    console.log("STEP 1 - Request received");
+
     const {
       product_name,
       description,
@@ -242,6 +245,9 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
       contact_number
     } = req.body;
 
+    console.log("STEP 1.1 - Request body:", req.body);
+    console.log("STEP 1.2 - Uploaded file:", req.file);
+
     if (!product_name || !category_name || !product_condition || !selling_price || !location || !contact_number) {
       return res.status(400).json({
         message: "Please complete all required product fields."
@@ -252,10 +258,14 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
     // Find Category ID
     // -----------------------------------------
 
+    console.log("STEP 2 - Looking up category:", category_name);
+
     const [categoryRows] = await pool.query(
       "SELECT category_id FROM categories WHERE category_name = ?",
       [category_name]
     );
+
+    console.log("STEP 3 - Category query result:", categoryRows);
 
     if (categoryRows.length === 0) {
       return res.status(400).json({
@@ -265,6 +275,8 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
 
     const categoryId = categoryRows[0].category_id;
 
+    console.log("STEP 4 - Category ID:", categoryId);
+
     // -----------------------------------------
     // Default image
     // -----------------------------------------
@@ -273,9 +285,13 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
       ? `/uploads/${req.file.filename}`
       : "images/placeholder.svg";
 
+    console.log("STEP 5 - Image URL:", imageUrl);
+
     // -----------------------------------------
     // Insert product
     // -----------------------------------------
+
+    console.log("STEP 6 - Inserting product...");
 
     const [result] = await pool.query(
       `
@@ -311,11 +327,17 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
       ]
     );
 
+    console.log("STEP 7 - Product inserted successfully");
+
     const productId = result.insertId;
+
+    console.log("STEP 8 - Product ID:", productId);
 
     // -----------------------------------------
     // Save image separately
     // -----------------------------------------
+
+    console.log("STEP 9 - Saving image record...");
 
     await pool.query(
       `
@@ -334,18 +356,30 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
       ]
     );
 
+    console.log("STEP 10 - Image record inserted");
+
     // -----------------------------------------
     // Return newly created product
     // -----------------------------------------
 
+    console.log("STEP 11 - Loading product...");
+
     const product = await loadProduct(productId);
+
+    console.log("STEP 12 - Product loaded:", product);
+
+    console.log("STEP 13 - Sending response");
 
     res.status(201).json({
       product
     });
 
   } catch (error) {
-    console.error("create product error:" ,error);
+
+    console.error("========== CREATE PRODUCT ERROR ==========");
+    console.error(error);
+    console.error("Stack:", error.stack);
+
     res.status(500).json({
       message: "Failed to save marketplace item.",
       error: error.message
