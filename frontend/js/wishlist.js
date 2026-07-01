@@ -31,23 +31,20 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    window.CS.renderProductGrid(root, products);
-    
-    // BUG FIX: Pass a clean visual modifier routine instead of full string loader wipes
-    window.CS.bindWishlistButtons(root, function (toggledId, isNowSaved) {
-      if (!isNowSaved) {
-        // Find the specific card element and fade/remove it natively without a page layout flash
-        const card = root.querySelector(`[data-product-card="${window.CS.escapeAttr(toggledId)}"]`);
-        if (card) {
-          card.style.opacity = "0";
-          card.style.transition = "opacity 0.2s ease-out";
-          window.setTimeout(function () {
-            card.remove();
-            // If the last remaining card was removed, re-trigger render to show the empty state message cleanly
-            if (!root.querySelector("[data-product-card]")) {
-              render(false);
-            }
-          }, 200);
+    window.CS.renderProductGrid(root, products, {
+      afterWishlistToggle: function (toggledId, isNowSaved) {
+        if (!isNowSaved) {
+          const card = root.querySelector(`[data-product-card="${window.CS.escapeAttr(toggledId)}"]`);
+          if (card) {
+            card.style.opacity = "0";
+            card.style.transition = "opacity 0.2s ease-out";
+            window.setTimeout(function () {
+              card.remove();
+              if (!root.querySelector("[data-product-card]")) {
+                render(false);
+              }
+            }, 200);
+          }
         }
       }
     });

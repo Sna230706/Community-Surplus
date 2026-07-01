@@ -7,8 +7,28 @@
   const CURRENT_USER_KEY = "community_surplus_current_user_v1";
   const TOKEN_KEY = "community_surplus_token_v1";
   const PURCHASE_KEY = "community_surplus_purchases_v1";
-  const API_BASE_URL = "https://community-surplus-production.up.railway.app/api";
+  const API_BASE_KEY = "community_surplus_api_base_url";
+  const REMOTE_API_BASE_URL = "https://community-surplus-production.up.railway.app/api";
+  const API_BASE_URL = resolveApiBaseUrl();
   const FALLBACK_IMAGE = "images/placeholder.svg";
+
+  function resolveApiBaseUrl() {
+    const saved = storageGet(API_BASE_KEY);
+    if (saved && saved.trim()) {
+      return saved.trim().replace(/\/+$/, "");
+    }
+
+    const host = window.location.hostname;
+    if (window.location.protocol === "file:" || host === "localhost" || host === "127.0.0.1") {
+      return "http://localhost:5000/api";
+    }
+
+    return REMOTE_API_BASE_URL;
+  }
+
+  function getApiOrigin() {
+    return API_BASE_URL.replace(/\/api\/?$/, "");
+  }
 
   function storageGet(key) {
     try {
@@ -83,7 +103,7 @@
   function normalizeProduct(product) {
     let image = product.image || product.image_url || FALLBACK_IMAGE;
     if (image && image.startsWith("/uploads/")) {
-      image = API_BASE_URL.replace("/api","") + image;
+      image = getApiOrigin() + image;
     }
 
     return {
@@ -275,7 +295,9 @@
         }).join("")}
       </div>
     `;
-    bindWishlistButtons(container);
+    if (settings.bindWishlist !== false) {
+      bindWishlistButtons(container, settings.afterWishlistToggle);
+    }
   }
 
   function getUsers() {
@@ -321,7 +343,11 @@
   }
 
   function shouldUseLocalAuth(error) {
-    return Boolean(error && (error.isNetworkError || error.status === 404));
+    return Boolean(error && (error.isNetworkError || error.status === 404 || error.status >= 500));
+  }
+
+  function shouldUseLocalData(error) {
+    return Boolean(error && (error.isNetworkError || error.status === 404 || error.status >= 500));
   }
 
   function loginUserLocal(credentials) {
@@ -499,11 +525,49 @@
   }
 
   async function createProduct(formData) {
-    const data = await apiFetch("/products", {
-      method: "POST",
-      body: formData
+    try {
+      const data = await apiFetch("/products", {
+        method: "POST",
+        body: formData
+      });
+      return normalizeProduct(data.product);
+    } catch (error) {
+      if (shouldUseLocalData(error) || error.status === 401) {
+        return createProductLocal(formData);
+      }
+      throw error;
+    }
+  }
+
+  async function createProductLocal(formData) {
+    const user = getCurrentUser();
+    if (!user) {
+      throw new Error("Please log in before adding a product.");
+    }
+
+    const file = formData.get("image");
+    const hasImageFile = typeof File !== "undefined" && file instanceof File && file.size > 0;
+    const image = hasImageFile ? await fileToDataUrl(file) : FALLBACK_IMAGE;
+    const product = normalizeProduct({
+      id: newId("p"),
+      product_name: formData.get("product_name"),
+      description: formData.get("description"),
+      category_name: formData.get("category_name"),
+      product_condition: formData.get("product_condition"),
+      mrp: formData.get("mrp"),
+      selling_price: formData.get("selling_price"),
+      quantity_available: formData.get("quantity_available"),
+      image,
+      location: formData.get("location"),
+      contact_number: formData.get("contact_number"),
+      status: "Available",
+      seller_id: user.user_id || user.id,
+      seller_name: user.name,
+      created_at: new Date().toISOString()
     });
-    return normalizeProduct(data.product);
+
+    saveProducts([product].concat(getProducts()));
+    return product;
   }
 
  async function updateProductRemote(id, payload) {
@@ -934,6 +998,7 @@
   window.CS = {
     addPurchase,
     apiFetch,
+    API_BASE_URL,
     bindWishlistButtons,
     confirmPurchaseRemote,
     createProduct,

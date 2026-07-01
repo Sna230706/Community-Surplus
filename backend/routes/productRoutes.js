@@ -3,6 +3,7 @@ const router = express.Router();
 
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 const jwt = require("jsonwebtoken");
 
 const pool = require("../config/db");
@@ -40,9 +41,12 @@ const verifyToken = (req, res, next) => {
 // MULTER CONFIGURATION
 // =====================================================
 
+const uploadDir = path.join(__dirname, "..", "uploads");
+fs.mkdirSync(uploadDir, { recursive: true });
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, uploadDir);
   },
 
   filename: function (req, file, cb) {
@@ -54,6 +58,44 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+async function loadProduct(productId) {
+  const [rows] = await pool.query(
+    `
+    SELECT
+      p.product_id,
+      p.seller_id,
+      p.product_name,
+      p.description,
+      p.product_condition,
+      p.mrp,
+      p.selling_price,
+      p.quantity_available,
+      p.location,
+      p.contact_number,
+      p.status,
+      p.created_at,
+      c.category_name,
+      u.name AS seller_name,
+      pi.image_url
+    FROM products p
+    JOIN users u
+      ON p.seller_id = u.user_id
+    JOIN categories c
+      ON p.category_id = c.category_id
+    LEFT JOIN (
+      SELECT product_id, MIN(image_url) AS image_url
+      FROM product_images
+      GROUP BY product_id
+    ) pi
+      ON p.product_id = pi.product_id
+    WHERE p.product_id = ?
+    `,
+    [productId]
+  );
+
+  return rows[0] || null;
+}
 
 // =====================================================
 // GET ALL PRODUCTS
@@ -185,14 +227,10 @@ ON p.product_id = pi.product_id
 // POST /api/products
 // =====================================================
 
-router.post("/", upload.single("image"), async (req, res) => {
+router.post("/", verifyToken, upload.single("image"), async (req, res) => {
 
   try {
-    console.log("BODY:", req.body);
-    console.log("FILE:",req.file);
-
     const {
-      seller_id,
       product_name,
       description,
       category_name,
@@ -203,6 +241,12 @@ router.post("/", upload.single("image"), async (req, res) => {
       location,
       contact_number
     } = req.body;
+
+    if (!product_name || !category_name || !product_condition || !selling_price || !location || !contact_number) {
+      return res.status(400).json({
+        message: "Please complete all required product fields."
+      });
+    }
 
     // -----------------------------------------
     // Find Category ID
@@ -254,7 +298,7 @@ router.post("/", upload.single("image"), async (req, res) => {
       (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Available')
       `,
       [
-        seller_id,
+        req.user.user_id,
         categoryId,
         product_name,
         description,
@@ -294,47 +338,10 @@ router.post("/", upload.single("image"), async (req, res) => {
     // Return newly created product
     // -----------------------------------------
 
-    const [rows] = await pool.query(
-      `
-      SELECT
-        p.product_id,
-        p.seller_id,
-        p.product_name,
-        p.description,
-        p.product_condition,
-        p.mrp,
-        p.selling_price,
-        p.quantity_available,
-        p.location,
-        p.contact_number,
-        p.status,
-        p.created_at,
-        c.category_name,
-        u.name AS seller_name,
-        pi.image_url
-
-      FROM products p
-
-      JOIN users u
-        ON p.seller_id = u.user_id
-
-      JOIN categories c
-        ON p.category_id = c.category_id
-
-      LEFT JOIN (
-    SELECT product_id, MIN(image_url) AS image_url
-    FROM product_images
-    GROUP BY product_id
-) pi
-ON p.product_id = pi.product_id
-
-      WHERE p.product_id = ?
-      `,
-      [productId]
-    );
+    const product = await loadProduct(productId);
 
     res.status(201).json({
-      product: rows[0]
+      product
     });
 
   } catch (error) {
@@ -352,7 +359,7 @@ ON p.product_id = pi.product_id
 // PUT /api/products/:id
 // =====================================================
 
-router.put("/:id", upload.single("image"), async (req,res)=>{
+router.put("/:id", verifyToken, upload.single("image"), async (req,res)=>{
 
   try {
 
@@ -368,6 +375,19 @@ router.put("/:id", upload.single("image"), async (req,res)=>{
       contact_number,
       status
     } = req.body;
+
+    const existingProduct = await loadProduct(req.params.id);
+    if (!existingProduct) {
+      return res.status(404).json({
+        message: "Product not found."
+      });
+    }
+
+    if (Number(existingProduct.seller_id) !== Number(req.user.user_id)) {
+      return res.status(403).json({
+        message: "You can only update your own products."
+      });
+    }
 
     // Get category ID
     const [categoryRows] = await pool.query(
@@ -409,52 +429,35 @@ router.put("/:id", upload.single("image"), async (req,res)=>{
         quantity_available,
         location,
         contact_number,
-        status,
+        status || existingProduct.status,
         req.params.id
       ]
     );
 
-    const [updated] = await pool.query(
-      `
-      SELECT
-        p.product_id,
-        p.seller_id,
-        p.product_name,
-        p.description,
-        p.product_condition,
-        p.mrp,
-        p.selling_price,
-        p.quantity_available,
-        p.location,
-        p.contact_number,
-        p.status,
-        p.created_at,
-        c.category_name,
-        u.name AS seller_name,
-        pi.image_url
+    if (req.file) {
+      const imageUrl = `/uploads/${req.file.filename}`;
+      const [images] = await pool.query(
+        "SELECT image_id FROM product_images WHERE product_id = ? ORDER BY image_id LIMIT 1",
+        [req.params.id]
+      );
 
-      FROM products p
+      if (images.length) {
+        await pool.query(
+          "UPDATE product_images SET image_url = ? WHERE image_id = ?",
+          [imageUrl, images[0].image_id]
+        );
+      } else {
+        await pool.query(
+          "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
+          [req.params.id, imageUrl]
+        );
+      }
+    }
 
-      JOIN users u
-        ON p.seller_id = u.user_id
-
-      JOIN categories c
-        ON p.category_id = c.category_id
-
-       LEFT JOIN (
-    SELECT product_id, MIN(image_url) AS image_url
-    FROM product_images
-    GROUP BY product_id
-) pi
-ON p.product_id = pi.product_id
-
-      WHERE p.product_id = ?
-      `,
-      [req.params.id]
-    );
+    const updated = await loadProduct(req.params.id);
 
     res.json({
-      product: updated[0]
+      product: updated
     });
 
   } catch (error) {
@@ -489,10 +492,20 @@ router.post("/:id/purchase", verifyToken, async (req, res) => {
 
     const buyQty = Number(quantity || 1);
 
+    if (!Number.isInteger(buyQty) || buyQty < 1) {
+      await connection.rollback();
+
+      return res.status(400).json({
+        message: "Please choose a valid purchase quantity."
+      });
+    }
+
     const [products] = await connection.query(
       `
       SELECT
+        seller_id,
         quantity_available,
+        status,
         selling_price
       FROM products
       WHERE product_id = ?
@@ -512,6 +525,22 @@ router.post("/:id/purchase", verifyToken, async (req, res) => {
     }
 
     const currentStock = products[0].quantity_available;
+
+    if (Number(products[0].seller_id) === Number(buyer_id)) {
+      await connection.rollback();
+
+      return res.status(400).json({
+        message: "You cannot purchase your own product."
+      });
+    }
+
+    if (products[0].status === "Sold") {
+      await connection.rollback();
+
+      return res.status(400).json({
+        message: "This product is already sold."
+      });
+    }
 
     if (currentStock < buyQty) {
 
@@ -597,9 +626,21 @@ router.post("/:id/purchase", verifyToken, async (req, res) => {
 // DELETE /api/products/:id
 // =====================================================
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyToken, async (req, res) => {
 
   try {
+    const existingProduct = await loadProduct(req.params.id);
+    if (!existingProduct) {
+      return res.status(404).json({
+        message: "Product not found."
+      });
+    }
+
+    if (Number(existingProduct.seller_id) !== Number(req.user.user_id)) {
+      return res.status(403).json({
+        message: "You can only delete your own products."
+      });
+    }
 
     await pool.query(
       "DELETE FROM product_images WHERE product_id = ?",

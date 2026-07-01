@@ -1,11 +1,11 @@
-CREATE DATABASE COMMUNITY_SURPLUS;
-USE COMMUNITY_SURPLUS;
+CREATE DATABASE IF NOT EXISTS community_surplus;
+USE community_surplus;
 
 -- =========================
 -- USERS
 -- =========================
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
 
     name VARCHAR(100) NOT NULL,
@@ -27,13 +27,13 @@ CREATE TABLE users (
 -- CATEGORIES
 -- =========================
 
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
 
     category_name VARCHAR(50) NOT NULL UNIQUE
 );
 
-INSERT INTO categories (category_name)
+INSERT IGNORE INTO categories (category_name)
 VALUES
 ('Furniture'),
 ('Stationery'),
@@ -47,7 +47,7 @@ VALUES
 -- PRODUCTS
 -- =========================
 
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
     product_id INT AUTO_INCREMENT PRIMARY KEY,
 
     seller_id INT NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE products (
 -- PRODUCT IMAGES
 -- =========================
 
-CREATE TABLE product_images (
+CREATE TABLE IF NOT EXISTS product_images (
     image_id INT AUTO_INCREMENT PRIMARY KEY,
 
     product_id INT NOT NULL,
@@ -112,7 +112,7 @@ CREATE TABLE product_images (
 -- WISHLIST
 -- =========================
 
-CREATE TABLE wishlist (
+CREATE TABLE IF NOT EXISTS wishlist (
     wishlist_id INT AUTO_INCREMENT PRIMARY KEY,
 
     user_id INT NOT NULL,
@@ -134,7 +134,7 @@ CREATE TABLE wishlist (
 -- ORDERS
 -- =========================
 
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
 
     buyer_id INT NOT NULL,
